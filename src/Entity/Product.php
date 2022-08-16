@@ -48,7 +48,7 @@ class Product
     public function __construct()
     {
         $this->customer = new ArrayCollection();
-        $this->orderProducts = new ArrayCollection();
+        $this->orders = new ArrayCollection();
     }
 
     public function getId(): ?int
