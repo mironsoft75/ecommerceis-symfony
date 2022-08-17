@@ -35,6 +35,21 @@ class OrderProduct
     private $product;
 
     /**
+     * @ORM\Column(type="integer")
+     */
+    private $quantity;
+
+    /**
+     * @ORM\Column(type="decimal", precision=13, scale=2, options={"default" : 0})
+     */
+    private $unitPrice;
+
+    /**
+     * @ORM\Column(type="decimal", precision=13, scale=2, options={"default" : 0})
+     */
+    private $total;
+
+    /**
      * @return mixed
      */
     public function getOrder()
@@ -64,5 +79,41 @@ class OrderProduct
     public function setProduct($product): void
     {
         $this->product = $product;
+    }
+
+    public function getQuantity(): ?int
+    {
+        return $this->quantity;
+    }
+
+    public function setQuantity(int $quantity): self
+    {
+        $this->quantity = $quantity;
+
+        return $this;
+    }
+
+    public function getUnitPrice(): ?string
+    {
+        return $this->unitPrice;
+    }
+
+    public function setUnitPrice(string $unitPrice): self
+    {
+        $this->unitPrice = $unitPrice;
+
+        return $this;
+    }
+
+    public function getTotal(): ?string
+    {
+        return $this->total;
+    }
+
+    public function setTotal(string $total): self
+    {
+        $this->total = $total;
+
+        return $this;
     }
 }

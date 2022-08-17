@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\OrderRepository;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -18,11 +19,6 @@ class Order
      * @ORM\Column(type="integer")
      */
     private $id;
-
-    /**
-     * @ORM\OneToOne(targetEntity=Customer::class, inversedBy="orderId", cascade={"persist", "remove"})
-     */
-    private $customerId;
 
     /**
      * @ORM\Column(type="decimal", precision=13, scale=2, options={"default" : 0})
@@ -50,18 +46,6 @@ class Order
         return $this->id;
     }
 
-    public function getCustomerId(): ?Customer
-    {
-        return $this->customerId;
-    }
-
-    public function setCustomerId(?Customer $customerId): self
-    {
-        $this->customerId = $customerId;
-
-        return $this;
-    }
-
     public function getTotal(): ?string
     {
         return $this->total;
@@ -84,5 +68,13 @@ class Order
         $this->customer = $customer;
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Product>
+     */
+    public function getProducts(): Collection
+    {
+        return $this->products;
     }
 }

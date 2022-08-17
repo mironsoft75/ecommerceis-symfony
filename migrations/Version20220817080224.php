@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20220816184304 extends AbstractMigration
+final class Version20220817080224 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -25,15 +25,13 @@ final class Version20220816184304 extends AbstractMigration
         $this->addSql('CREATE SEQUENCE order_product_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE product_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE TABLE category (id INT NOT NULL, name VARCHAR(255) NOT NULL, PRIMARY KEY(id))');
-        $this->addSql('CREATE TABLE "order" (id INT NOT NULL, customer_id_id INT DEFAULT NULL, customer_id INT NOT NULL, total NUMERIC(13, 2) DEFAULT \'0\' NOT NULL, PRIMARY KEY(id))');
-        $this->addSql('CREATE UNIQUE INDEX UNIQ_F5299398B171EB6C ON "order" (customer_id_id)');
+        $this->addSql('CREATE TABLE "order" (id INT NOT NULL, customer_id INT NOT NULL, total NUMERIC(13, 2) DEFAULT \'0\' NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_F52993989395C3F3 ON "order" (customer_id)');
-        $this->addSql('CREATE TABLE order_product (id INT NOT NULL, order_id INT NOT NULL, product_id INT NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE order_product (id INT NOT NULL, order_id INT NOT NULL, product_id INT NOT NULL, quantity INT NOT NULL, unit_price NUMERIC(13, 2) DEFAULT \'0\' NOT NULL, total NUMERIC(13, 2) DEFAULT \'0\' NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_2530ADE68D9F6D38 ON order_product (order_id)');
         $this->addSql('CREATE INDEX IDX_2530ADE64584665A ON order_product (product_id)');
         $this->addSql('CREATE TABLE product (id INT NOT NULL, category_id INT NOT NULL, name VARCHAR(255) NOT NULL, price NUMERIC(13, 2) DEFAULT \'0\' NOT NULL, stock INT DEFAULT 0 NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_D34A04AD12469DE2 ON product (category_id)');
-        $this->addSql('ALTER TABLE "order" ADD CONSTRAINT FK_F5299398B171EB6C FOREIGN KEY (customer_id_id) REFERENCES customer (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE "order" ADD CONSTRAINT FK_F52993989395C3F3 FOREIGN KEY (customer_id) REFERENCES customer (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE order_product ADD CONSTRAINT FK_2530ADE68D9F6D38 FOREIGN KEY (order_id) REFERENCES "order" (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE order_product ADD CONSTRAINT FK_2530ADE64584665A FOREIGN KEY (product_id) REFERENCES product (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
@@ -49,7 +47,6 @@ final class Version20220816184304 extends AbstractMigration
         $this->addSql('DROP SEQUENCE "order_id_seq" CASCADE');
         $this->addSql('DROP SEQUENCE order_product_id_seq CASCADE');
         $this->addSql('DROP SEQUENCE product_id_seq CASCADE');
-        $this->addSql('ALTER TABLE "order" DROP CONSTRAINT FK_F5299398B171EB6C');
         $this->addSql('ALTER TABLE "order" DROP CONSTRAINT FK_F52993989395C3F3');
         $this->addSql('ALTER TABLE order_product DROP CONSTRAINT FK_2530ADE68D9F6D38');
         $this->addSql('ALTER TABLE order_product DROP CONSTRAINT FK_2530ADE64584665A');
