@@ -39,6 +39,13 @@ class OrderRepository extends ServiceEntityRepository
         }
     }
 
+    public function getAllProductByCustomerId()
+    {
+        $em = $this->getEntityManager();
+        $em->
+        $this->createQueryBuilder('o')->get;
+    }
+
 //    /**
 //     * @return Order[] Returns an array of Order objects
 //     */
