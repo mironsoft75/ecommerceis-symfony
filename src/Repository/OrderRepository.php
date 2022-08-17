@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Order;
+use App\Helper\GeneralHelper;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -41,9 +42,11 @@ class OrderRepository extends ServiceEntityRepository
 
     public function getAllProductByCustomerId()
     {
-        $em = $this->getEntityManager();
-        $em->
-        $this->createQueryBuilder('o')->get;
+        return $this->createQueryBuilder('o')
+            ->join('o.products', 'p')
+            ->where('o.customer = :customer_id')
+            ->setParameter('customer_id', GeneralHelper::getCustomerId())
+            ->getQuery()->execute();
     }
 
 //    /**
