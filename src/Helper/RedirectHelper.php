@@ -110,8 +110,7 @@ class RedirectHelper
                 'message' => $message,
                 'data' => $attributes
             ],
-            $statusCode,
-        ]);
+        ], $statusCode);
     }
 
 }
