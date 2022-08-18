@@ -30,7 +30,7 @@ class OrderProduct
     private $order;
 
     /**
-     * @ORM\ManyToOne (targetEntity=Product::class, inversedBy="orderProducts")
+     * @ORM\ManyToOne (targetEntity=Product::class, inversedBy="orderProducts", fetch="EAGER")
      * @ORM\JoinColumn(name="product_id", referencedColumnName="id")
      */
     private $product;

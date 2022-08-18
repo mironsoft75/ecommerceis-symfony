@@ -9,6 +9,6 @@ class GeneralHelper
 {
     public static function getCustomerId()
     {
-        return 40;
+        return 1;
     }
 }

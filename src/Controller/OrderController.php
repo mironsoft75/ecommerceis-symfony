@@ -2,13 +2,11 @@
 
 namespace App\Controller;
 
-use App\Entity\Customer;
 use App\Helper\RedirectHelper;
 use App\Service\OrderService;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
 
 class OrderController extends AbstractController
 {
@@ -27,6 +25,7 @@ class OrderController extends AbstractController
             $this->orderService->index()
         );
 
+        /*
         $entityManager = $doctrine->getManager();
 
         $customer = new Customer();
@@ -38,6 +37,6 @@ class OrderController extends AbstractController
 
         return $this->render('order/index.html.twig', [
             'controller_name' => 'OrderController',
-        ]);
+        ]);*/
     }
 }

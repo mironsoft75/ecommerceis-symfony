@@ -106,7 +106,7 @@ class RedirectHelper
     public static function response(int $statusCode, $attributes, string $message): JsonResponse
     {
         return new JsonResponse([
-            [ //Data
+            [
                 'message' => $message,
                 'data' => $attributes
             ],

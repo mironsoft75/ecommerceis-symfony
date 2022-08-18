@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Repository\OrderRepository;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class OrderService
 {

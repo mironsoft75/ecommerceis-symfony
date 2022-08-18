@@ -46,31 +46,26 @@ class OrderRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('o')
             ->where('o.customer = :customer_id')
             ->setParameter('customer_id', GeneralHelper::getCustomerId())
-            //->setMaxResults(1)
-            ->getQuery()->getSingleResult();
-
-        /*return $this->findBy([
-            'customer' => GeneralHelper::getCustomerId()
-        ]);*/
+            ->getQuery()->getOneOrNullResult();
     }
 
     public function getOrderProducts(Order $order)
     {
-        /*foreach (as $product)
+        /*foreach ($order->getOrderProducts() as $product)
         {
-            dd($product->getProduct());
+            dd($product);
         }*/
 
-        $test = $order->getOrderProducts();
-        dd($test);
-        //dd($test->getProduct());
-        return $order;
+        //dd($test[0]->getProduct());
+        return $order->getOrderProducts();
     }
 
-    public function getAllProductByCustomerId()
+    public function getAllProductByCustomerId(): Order
     {
-        dd($this->getOrderProducts($this->getDefaultOrder()));
-        //dd();
+        //dd($this->getDefaultOrder());
+        //dd($this->getOrderProducts($this->getDefaultOrder()));
+        return $this->getDefaultOrder();
+        return $this->getOrderProducts($this->getDefaultOrder());
 
         /*$this->getDefaultOrder()->getProducts()
         foreach ( as $product){
