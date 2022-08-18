@@ -19,7 +19,7 @@ class OrderController extends AbstractController
     }
 
     /**
-     * @Route("/order", name="app_order", methods={"GET"})
+     * @Route("/orders", name="app_order", methods={"GET"})
      */
     public function index(ManagerRegistry $doctrine): Response
     {

@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Order;
+use App\Entity\OrderProduct;
 use App\Helper\GeneralHelper;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -40,13 +41,51 @@ class OrderRepository extends ServiceEntityRepository
         }
     }
 
-    public function getAllProductByCustomerId()
+    public function getDefaultOrder(): Order
     {
         return $this->createQueryBuilder('o')
-            ->join('o.products', 'p')
             ->where('o.customer = :customer_id')
             ->setParameter('customer_id', GeneralHelper::getCustomerId())
-            ->getQuery()->execute();
+            //->setMaxResults(1)
+            ->getQuery()->getSingleResult();
+
+        /*return $this->findBy([
+            'customer' => GeneralHelper::getCustomerId()
+        ]);*/
+    }
+
+    public function getOrderProducts(Order $order)
+    {
+        /*foreach (as $product)
+        {
+            dd($product->getProduct());
+        }*/
+
+        $test = $order->getOrderProducts();
+        dd($test);
+        //dd($test->getProduct());
+        return $order;
+    }
+
+    public function getAllProductByCustomerId()
+    {
+        dd($this->getOrderProducts($this->getDefaultOrder()));
+        //dd();
+
+        /*$this->getDefaultOrder()->getProducts()
+        foreach ( as $product){
+            dd($product);
+        }*/
+
+        //$order->getProducts();
+
+        /*return $this->createQueryBuilder('o')
+            ->select('o.id, o.total, p.quantity')
+            ->join('o.products', 'p')
+            //->join('p.order', 'po')
+            ->where('o.customer = :customer_id')
+            ->setParameter('customer_id', GeneralHelper::getCustomerId())
+            ->getQuery()->getResult();*/
     }
 
 //    /**
