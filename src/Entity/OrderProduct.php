@@ -24,14 +24,14 @@ class OrderProduct
     }
 
     /**
-     * @ORM\ManyToOne (targetEntity=Order::class)
+     * @ORM\ManyToOne(targetEntity=Order::class, inversedBy="orderProducts")
      * @ORM\JoinColumn(nullable=false)
      */
     private $order;
 
     /**
-     * @ORM\ManyToOne (targetEntity=Product::class)
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\ManyToOne (targetEntity=Product::class, inversedBy="orderProducts")
+     * @ORM\JoinColumn(name="product_id", referencedColumnName="id")
      */
     private $product;
 

@@ -32,13 +32,13 @@ class Order
     private $customer;
 
     /**
-     * @ORM\OneToMany(targetEntity=OrderProduct::class, mappedBy="product")
+     * @ORM\OneToMany(targetEntity=OrderProduct::class, mappedBy="order")
      */
-    private $products;
+    private $orderProducts;
 
     public function __construct()
     {
-        $this->products = new ArrayCollection();
+        $this->orderProducts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -71,10 +71,10 @@ class Order
     }
 
     /**
-     * @return Collection<int, Product>
+     * @return Collection<int, OrderProduct>
      */
-    public function getProducts(): Collection
+    public function getOrderProducts(): Collection
     {
-        return $this->products;
+        return $this->orderProducts;
     }
 }
