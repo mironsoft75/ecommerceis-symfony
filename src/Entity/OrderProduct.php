@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\OrderProductRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=OrderProductRepository::class)
@@ -29,6 +30,11 @@ class OrderProduct
      * @ORM\ManyToOne(targetEntity=Order::class, inversedBy="orderProducts")
      * @ORM\JoinColumn(nullable=false)
      * @Groups({"orderProductOrderRelation"})
+     * @Assert\NotBlank
+     * @Assert\Type(
+     *     type="integer",
+     *     message="The value {{ value }} is not a valid {{ type }}."
+     * )
      */
     private $order;
 
@@ -36,12 +42,21 @@ class OrderProduct
      * @ORM\ManyToOne (targetEntity=Product::class, inversedBy="orderProducts")
      * @ORM\JoinColumn(nullable=false)
      * @Groups({"orderProductProductRelation"})
+     * @Assert\NotBlank
+     * @Assert\Type(
+     *     type="integer",
+     *     message="The value {{ value }} is not a valid {{ type }}."
+     * )
      */
     private $product;
 
     /**
      * @ORM\Column(type="integer")
      * @Groups({"orderProduct"})
+     * @Assert\Type(
+     *     type="integer",
+     *     message="The value {{ value }} is not a valid {{ type }}."
+     * )
      */
     private $quantity;
 
