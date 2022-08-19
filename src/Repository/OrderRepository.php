@@ -3,9 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\Order;
-use App\Entity\OrderProduct;
 use App\Helper\GeneralHelper;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -41,46 +41,17 @@ class OrderRepository extends ServiceEntityRepository
         }
     }
 
-    public function getDefaultOrder(): Order
+    /**
+     * Müşteriye ait ilk order kaydını getirir yoksa null döner.
+     * @return Order|null
+     * @throws NonUniqueResultException
+     */
+    public function getDefaultOrder(): ?Order
     {
         return $this->createQueryBuilder('o')
             ->where('o.customer = :customer_id')
             ->setParameter('customer_id', GeneralHelper::getCustomerId())
             ->getQuery()->getOneOrNullResult();
-    }
-
-    public function getOrderProducts(Order $order)
-    {
-        /*foreach ($order->getOrderProducts() as $product)
-        {
-            dd($product);
-        }*/
-
-        //dd($test[0]->getProduct());
-        return $order->getOrderProducts();
-    }
-
-    public function getAllProductByCustomerId(): Order
-    {
-        //dd($this->getDefaultOrder());
-        //dd($this->getOrderProducts($this->getDefaultOrder()));
-        return $this->getDefaultOrder();
-        return $this->getOrderProducts($this->getDefaultOrder());
-
-        /*$this->getDefaultOrder()->getProducts()
-        foreach ( as $product){
-            dd($product);
-        }*/
-
-        //$order->getProducts();
-
-        /*return $this->createQueryBuilder('o')
-            ->select('o.id, o.total, p.quantity')
-            ->join('o.products', 'p')
-            //->join('p.order', 'po')
-            ->where('o.customer = :customer_id')
-            ->setParameter('customer_id', GeneralHelper::getCustomerId())
-            ->getQuery()->getResult();*/
     }
 
 //    /**
