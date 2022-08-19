@@ -6,6 +6,7 @@ use App\Repository\CustomerRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=CustomerRepository::class)
@@ -17,26 +18,31 @@ class Customer
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
      * @ORM\Column(type="integer")
+     * @Groups({"customer"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"customer"})
      */
     private $name;
 
     /**
      * @ORM\Column(type="date")
+     * @Groups({"customer"})
      */
     private $since;
 
     /**
      * @ORM\Column(type="decimal", precision=13, scale=2, options={"default" : 0})
+     * @Groups({"customer"})
      */
     private $revenue;
 
     /**
      * @ORM\OneToMany(targetEntity=Order::class, mappedBy="customer", orphanRemoval=true)
+     * @Groups({"customerOrderRelation"})
      */
     private $orders;
 

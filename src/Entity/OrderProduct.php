@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\OrderProductRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=OrderProductRepository::class)
@@ -15,6 +16,7 @@ class OrderProduct
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
      * @ORM\Column(type="integer")
+     * @Groups({"orderProduct"})
      */
     private $id;
 
@@ -26,27 +28,32 @@ class OrderProduct
     /**
      * @ORM\ManyToOne(targetEntity=Order::class, inversedBy="orderProducts")
      * @ORM\JoinColumn(nullable=false)
+     * @Groups({"orderProductOrderRelation"})
      */
     private $order;
 
     /**
-     * @ORM\ManyToOne (targetEntity=Product::class, inversedBy="orderProducts", fetch="EAGER")
-     * @ORM\JoinColumn(name="product_id", referencedColumnName="id")
+     * @ORM\ManyToOne (targetEntity=Product::class, inversedBy="orderProducts")
+     * @ORM\JoinColumn(nullable=false)
+     * @Groups({"orderProductProductRelation"})
      */
     private $product;
 
     /**
      * @ORM\Column(type="integer")
+     * @Groups({"orderProduct"})
      */
     private $quantity;
 
     /**
      * @ORM\Column(type="decimal", precision=13, scale=2, options={"default" : 0})
+     * @Groups({"orderProduct"})
      */
     private $unitPrice;
 
     /**
      * @ORM\Column(type="decimal", precision=13, scale=2, options={"default" : 0})
+     * @Groups({"orderProduct"})
      */
     private $total;
 

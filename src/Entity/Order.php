@@ -6,6 +6,8 @@ use App\Repository\OrderRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=OrderRepository::class)
@@ -17,22 +19,26 @@ class Order
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
      * @ORM\Column(type="integer")
+     * @Groups({"order"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="decimal", precision=13, scale=2, options={"default" : 0})
+     * @Groups({"order"})
      */
     private $total;
 
     /**
      * @ORM\ManyToOne(targetEntity=Customer::class, inversedBy="orders")
      * @ORM\JoinColumn(nullable=false)
+     * @Groups({"order"})
      */
     private $customer;
 
     /**
      * @ORM\OneToMany(targetEntity=OrderProduct::class, mappedBy="order")
+     * @Groups({"orderOrderProductRelation"})
      */
     private $orderProducts;
 
