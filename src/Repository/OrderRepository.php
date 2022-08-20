@@ -41,6 +41,15 @@ class OrderRepository extends ServiceEntityRepository
         }
     }
 
+    public function update(Order $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
     /**
      * Müşteriye ait ilk order kaydını getirir yoksa null döner.
      * @return Order|null

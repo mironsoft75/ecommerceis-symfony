@@ -3,10 +3,12 @@
 namespace App\Controller;
 
 use App\Enums\OrderStoreStatus;
+use App\Helper\GeneralHelper;
 use App\Helper\RedirectHelper;
 use App\Service\OrderService;
 use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -25,17 +27,24 @@ class OrderController extends AbstractController
 
     /**
      * Siparişe ait tüm ürünleri listeleme
-     * @Route ("/orders", name="app_order", methods={"GET"})
+     * @Route ("/orders", name="orders", methods={"GET"})
      * @throws NonUniqueResultException
      */
-    public function index(): Response
+    public function index(): JsonResponse
     {
         return RedirectHelper::success($this->orderService->index());
     }
 
-    public function store(Request $request)
+    /**
+     * @param Request $request
+     * @Route ("/orders", name="order_store", methods={"POST"})
+     * @return JsonResponse
+     * @throws NonUniqueResultException
+     */
+    public function store(Request $request): JsonResponse
     {
-        $errors = $this->validator->validate($request->query->all(), new Assert\Collection([
+        $data = GeneralHelper::getJson($request);
+        $errors = $this->validator->validate($data, new Assert\Collection([
             'product_id' => [
                 new Assert\NotBlank(),
                 new Assert\Type('integer'),
@@ -47,10 +56,10 @@ class OrderController extends AbstractController
         ]));
 
         if (count($errors) > 0) {
-
+            return RedirectHelper::badRequest(GeneralHelper::getErrorMessages($errors));
         }
 
-        $status = $this->orderService->store($request->query->all());
+        $status = $this->orderService->store($data);
         switch ($status) {
             case OrderStoreStatus::SUCCESS:
                 return RedirectHelper::store();

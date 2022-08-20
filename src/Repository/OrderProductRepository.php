@@ -39,6 +39,15 @@ class OrderProductRepository extends ServiceEntityRepository
         }
     }
 
+    public function update(OrderProduct $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
 //    /**
 //     * @return OrderProduct[] Returns an array of OrderProduct objects
 //     */
