@@ -59,7 +59,7 @@ class OrderRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('o')
             ->where('o.customer = :customer_id')
-            ->setParameter('customer_id', GeneralHelper::getCustomerId())
+            ->setParameter('customer_id', getCustomerId())
             ->getQuery()->getOneOrNullResult();
     }
 

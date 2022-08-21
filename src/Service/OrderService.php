@@ -141,7 +141,7 @@ class OrderService
     {
         $firstOrder = $this->orderRepository->getDefaultOrder();
         if (is_null($firstOrder)) {
-            $customer = $this->customerRepository->findOneBy(['id' => GeneralHelper::getCustomerId()]);
+            $customer = $this->customerRepository->findOneBy(['id' => getCustomerId()]);
             $order = new Order();
             $order->setTotal(0);
             $order->setCustomer($customer);

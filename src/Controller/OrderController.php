@@ -66,8 +66,16 @@ class OrderController extends AbstractController
     {
         if ($this->orderService->removeByProductId($productId)) {
             return RedirectHelper::destroy();
-        } else {
-            return RedirectHelper::badRequest();
         }
+        return RedirectHelper::badRequest();
+    }
+
+    /**
+     * @Route ("/orders/discount", name="order_discount", methods={"GET"})
+     * @return JsonResponse
+     */
+    public function discount(): JsonResponse
+    {
+
     }
 }

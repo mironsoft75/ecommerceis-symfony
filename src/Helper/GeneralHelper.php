@@ -10,11 +10,6 @@ use Symfony\Component\Validator\ConstraintViolationList;
 
 class GeneralHelper
 {
-    public static function getCustomerId(): int
-    {
-        return 1;
-    }
-
     public static function getJson(Request $request)
     {
         $data = json_decode($request->getContent(), true);
@@ -33,10 +28,5 @@ class GeneralHelper
             $messages[$error->getPropertyPath()][] = $error->getMessage();
         }
         return $messages;
-    }
-
-    public static function calculatePercent($val, $percent)
-    {
-        return ($val / 100) * $percent;
     }
 }
