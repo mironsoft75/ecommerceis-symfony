@@ -10,7 +10,7 @@ use Symfony\Component\Validator\ConstraintViolationList;
 
 class GeneralHelper
 {
-    public static function getCustomerId()
+    public static function getCustomerId(): int
     {
         return 1;
     }

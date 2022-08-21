@@ -60,8 +60,8 @@ class OrderService
 
             $orderProduct = $this->orderProductRepository->findOneBy( //aynı ürün daha önce eklenmiş mi ?
                 [
-                    'order_id' => $order->getId(),
-                    'product_id' => $product->getId()
+                    'order' => $order->getId(),
+                    'product' => $product->getId()
                 ]
             );
 
@@ -70,7 +70,7 @@ class OrderService
                 $orderProduct->setUnitPrice($product->getPrice());
                 $orderProduct->setTotal($total);
                 $this->orderProductRepository->update($orderProduct, true);
-            } else { //aynı ürün daha önce eklenmediyse ürün ekleme yapılır
+            } else { //aynı ürün daha önce siparişe eklenmediyse ürünü siparişe ekleme yapılır
                 $orderProduct = new OrderProduct();
                 $orderProduct->setOrder($order);
                 $orderProduct->setProduct($product);
@@ -87,7 +87,7 @@ class OrderService
             }
 
             $order->setTotal($orderTotal);
-            $this->orderRepository->update($order);
+            $this->orderRepository->update($order, true);
 
             return OrderStoreStatus::SUCCESS;
         }
