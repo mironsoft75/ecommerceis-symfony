@@ -26,7 +26,7 @@ class OrderService extends BaseService
     public function __construct(OrderRepository        $orderRepository, CustomerRepository $customerRepository,
                                 ProductRepository      $productRepository, OrderProductRepository $orderProductRepository,
                                 SerializerInterface    $serializer, ValidatorInterface $validator,
-                                EntityManagerInterface $entityManager)
+                                EntityManagerInterface $em)
     {
         $this->orderRepository = $orderRepository;
         $this->customerRepository = $customerRepository;
@@ -35,12 +35,12 @@ class OrderService extends BaseService
 
         $this->serializer = $serializer;
         $this->validator = $validator;
-        $this->entityManager = $entityManager;
+        $this->em = $em;
 
-        $this->orderRepository->setEntityManager($this->entityManager);
-        $this->customerRepository->setEntityManager($this->entityManager);
-        $this->productRepository->setEntityManager($this->entityManager);
-        $this->orderProductRepository->setEntityManager($this->entityManager);
+        $this->orderRepository->setEntityManager($this->em);
+        $this->customerRepository->setEntityManager($this->em);
+        $this->productRepository->setEntityManager($this->em);
+        $this->orderProductRepository->setEntityManager($this->em);
 
     }
 
@@ -61,7 +61,7 @@ class OrderService extends BaseService
      */
     public function store($attributes)
     {
-        return $this->entityManager->transactional(function ($em) use ($attributes) {
+        return $this->em->transactional(function ($em) use ($attributes) {
 
             $errors = $this->validator->validate($attributes, new Assert\Collection([
                 'product_id' => [
@@ -128,43 +128,46 @@ class OrderService extends BaseService
     }
 
     /**
+     * Siparişten ürünü siler ve sipariş total fiyatını günceller.
      * @param $productId
      * @return bool
-     * @throws NonUniqueResultException
      */
     public function removeByProductId($productId): bool
     {
-        $order = $this->getDefaultOrder();
-        $orderProduct = $this->orderProductRepository->findOneBy([
-            'order' => $order->getId(),
-            'product' => $productId
-        ]);
+        return $this->em->transactional(function ($em) use ($productId){
+            $order = $this->getDefaultOrder();
+            $orderProduct = $this->orderProductRepository->findOneBy([
+                'order' => $order->getId(),
+                'product' => $productId
+            ]);
 
-        if ($orderProduct) {
-            $order->setTotal($order->getTotal() - $orderProduct->getTotal());
-            $this->orderRepository->update($order);
-            $this->orderProductRepository->remove($orderProduct, true);
-            return true;
-        }
-        return false;
+            if ($orderProduct) {
+                $order->setTotal($order->getTotal() - $orderProduct->getTotal());
+                $this->orderRepository->update($order);
+                $this->orderProductRepository->remove($orderProduct, true);
+                return true;
+            }
+            return false;
+        });
     }
 
     /**
      * Müşteriye ait sipariş kaydı varsa döner yoksa oluşturup döner. (FirstOrCreate)
-     * @throws NonUniqueResultException
      */
     public function getDefaultOrder(): Order
     {
-        $firstOrder = $this->orderRepository->getDefaultOrder();
-        if (is_null($firstOrder)) {
-            $customer = $this->customerRepository->findOneBy(['id' => getCustomerId()]);
-            $order = new Order();
-            $order->setTotal(0);
-            $order->setCustomer($customer);
-            $this->orderRepository->add($order, true);
-            return $this->getDefaultOrder();
-        }
-        return $firstOrder;
+        return $this->em->transactional(function ($em) {
+            $firstOrder = $this->orderRepository->getDefaultOrder();
+            if (is_null($firstOrder)) {
+                $customer = $this->customerRepository->findOneBy(['id' => getCustomerId()]);
+                $order = new Order();
+                $order->setTotal(0);
+                $order->setCustomer($customer);
+                $this->orderRepository->add($order, true);
+                return $this->getDefaultOrder();
+            }
+            return $firstOrder;
+        });
     }
 
     public function discount(): array

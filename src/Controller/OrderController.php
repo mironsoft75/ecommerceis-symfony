@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class OrderController extends AbstractController
 {
-    private $orderService;
+    private OrderService $orderService;
 
     public function __construct(OrderService $orderService)
     {
@@ -36,7 +36,6 @@ class OrderController extends AbstractController
      * @Route ("/orders", name="order_store", methods={"POST"})
      * @param Request $request
      * @return JsonResponse
-     * @throws NonUniqueResultException
      */
     public function store(Request $request): JsonResponse
     {
@@ -57,10 +56,10 @@ class OrderController extends AbstractController
     }
 
     /**
+     * Siparişten ürünü siler ve sipariş total fiyatını günceller.
      * @Route ("/orders/product/{productId}", name="order_remove_product", methods={"DELETE"})
      * @param $productId
      * @return JsonResponse
-     * @throws NonUniqueResultException
      */
     public function removeByProductId($productId): JsonResponse
     {

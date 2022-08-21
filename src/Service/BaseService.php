@@ -8,7 +8,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class BaseService
 {
-    protected EntityManagerInterface $entityManager;
+    protected EntityManagerInterface $em;
     protected ValidatorInterface $validator;
     protected SerializerInterface $serializer;
 }
