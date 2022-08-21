@@ -6,30 +6,42 @@ use App\Entity\Order;
 use App\Entity\OrderProduct;
 use App\Enums\OrderStoreStatus;
 use App\Helper\GeneralHelper;
-use App\Helper\RedirectHelper;
 use App\Repository\CustomerRepository;
 use App\Repository\OrderProductRepository;
 use App\Repository\OrderRepository;
 use App\Repository\ProductRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class OrderService
+class OrderService extends BaseService
 {
-    private $orderRepository, $customerRepository, $productRepository, $orderProductRepository, $serializer, $validator;
+    private OrderRepository $orderRepository;
+    private CustomerRepository $customerRepository;
+    private ProductRepository $productRepository;
+    private OrderProductRepository $orderProductRepository;
 
-    public function __construct(OrderRepository     $orderRepository, CustomerRepository $customerRepository,
-                                ProductRepository   $productRepository, OrderProductRepository $orderProductRepository,
-                                SerializerInterface $serializer, ValidatorInterface $validator)
+    public function __construct(OrderRepository        $orderRepository, CustomerRepository $customerRepository,
+                                ProductRepository      $productRepository, OrderProductRepository $orderProductRepository,
+                                SerializerInterface    $serializer, ValidatorInterface $validator,
+                                EntityManagerInterface $entityManager)
     {
         $this->orderRepository = $orderRepository;
         $this->customerRepository = $customerRepository;
         $this->productRepository = $productRepository;
         $this->orderProductRepository = $orderProductRepository;
+
         $this->serializer = $serializer;
         $this->validator = $validator;
+        $this->entityManager = $entityManager;
+
+        $this->orderRepository->setEntityManager($this->entityManager);
+        $this->customerRepository->setEntityManager($this->entityManager);
+        $this->productRepository->setEntityManager($this->entityManager);
+        $this->orderProductRepository->setEntityManager($this->entityManager);
+
     }
 
     /**
@@ -45,72 +57,74 @@ class OrderService
     /**
      * Siparişe ürün ekleme veya mevcut ürünü güncelleme.
      * @param $attributes
-     * @return int|array
-     * @throws NonUniqueResultException
+     * @return mixed
      */
     public function store($attributes)
     {
-        $errors = $this->validator->validate($attributes, new Assert\Collection([
-            'product_id' => [
-                new Assert\NotBlank(),
-                new Assert\Type('integer'),
-            ],
-            'quantity' => [
-                new Assert\NotBlank(),
-                new Assert\Type('integer'),
-            ]
-        ]));
+        return $this->entityManager->transactional(function ($em) use ($attributes) {
 
-        if (count($errors) > 0) {
-            return GeneralHelper::getErrorMessages($errors);
-        }
-
-        $order = $this->getDefaultOrder();
-        $product = $this->productRepository->findOneBy([
-            'id' => $attributes['product_id']
-        ]);
-
-        if ($order && $product) {
-            if ($attributes['quantity'] > $product->getStock()) {
-                return OrderStoreStatus::PRODUCT_STOCK;
-            }
-
-            $total = $product->getPrice() * $attributes['quantity']; // ürünün toplam fıyatı.
-
-            $orderProduct = $this->orderProductRepository->findOneBy( //aynı ürün daha önce eklenmiş mi ?
-                [
-                    'order' => $order->getId(),
-                    'product' => $product->getId()
+            $errors = $this->validator->validate($attributes, new Assert\Collection([
+                'product_id' => [
+                    new Assert\NotBlank(),
+                    new Assert\Type('integer'),
+                ],
+                'quantity' => [
+                    new Assert\NotBlank(),
+                    new Assert\Type('integer'),
                 ]
-            );
+            ]));
 
-            if ($orderProduct) { //aynı ürün daha önce eklenmişse güncelleme yapılır.
-                $orderProduct->setQuantity($attributes['quantity']);
-                $orderProduct->setUnitPrice($product->getPrice());
-                $orderProduct->setTotal($total);
-                $this->orderProductRepository->update($orderProduct, true);
-            } else { //aynı ürün daha önce siparişe eklenmediyse ürünü siparişe ekleme yapılır
-                $orderProduct = new OrderProduct();
-                $orderProduct->setOrder($order);
-                $orderProduct->setProduct($product);
-                $orderProduct->setQuantity($attributes['quantity']);
-                $orderProduct->setUnitPrice($product->getPrice());
-                $orderProduct->setTotal($total);
-                $this->orderProductRepository->add($orderProduct, true);
+            if (count($errors) > 0) {
+                return GeneralHelper::getErrorMessages($errors);
             }
 
-            //Siparis toplaminin guncellenmesi
-            $orderTotal = 0;
-            foreach ($order->getOrderProducts() as $orderProduct) {
-                $orderTotal += $orderProduct->getTotal();
+            $order = $this->getDefaultOrder();
+            $product = $this->productRepository->findOneBy([
+                'id' => $attributes['product_id']
+            ]);
+
+            if ($order && $product) {
+                if ($attributes['quantity'] > $product->getStock()) {
+                    return OrderStoreStatus::PRODUCT_STOCK;
+                }
+
+                $total = $product->getPrice() * $attributes['quantity']; // ürünün toplam fıyatı.
+
+                $orderProduct = $this->orderProductRepository->findOneBy( //aynı ürün daha önce eklenmiş mi ?
+                    [
+                        'order' => $order->getId(),
+                        'product' => $product->getId()
+                    ]
+                );
+
+                if ($orderProduct) { //aynı ürün daha önce eklenmişse güncelleme yapılır.
+                    $orderProduct->setQuantity($attributes['quantity']);
+                    $orderProduct->setUnitPrice($product->getPrice());
+                    $orderProduct->setTotal($total);
+                    $this->orderProductRepository->update($orderProduct, true);
+                } else { //aynı ürün daha önce siparişe eklenmediyse ürünü siparişe ekleme yapılır
+                    $orderProduct = new OrderProduct();
+                    $orderProduct->setOrder($order);
+                    $orderProduct->setProduct($product);
+                    $orderProduct->setQuantity($attributes['quantity']);
+                    $orderProduct->setUnitPrice($product->getPrice());
+                    $orderProduct->setTotal($total);
+                    $this->orderProductRepository->add($orderProduct, true);
+                }
+
+                //Siparis toplaminin guncellenmesi
+                $orderTotal = 0;
+                foreach ($order->getOrderProducts() as $orderProduct) {
+                    $orderTotal += $orderProduct->getTotal();
+                }
+
+                $order->setTotal($orderTotal);
+                $this->orderRepository->update($order, true);
+
+                return OrderStoreStatus::SUCCESS;
             }
-
-            $order->setTotal($orderTotal);
-            $this->orderRepository->update($order, true);
-
-            return OrderStoreStatus::SUCCESS;
-        }
-        return OrderStoreStatus::ERROR;
+            return OrderStoreStatus::ERROR;
+        });
     }
 
     /**
@@ -126,7 +140,7 @@ class OrderService
             'product' => $productId
         ]);
 
-        if($orderProduct){
+        if ($orderProduct) {
             $order->setTotal($order->getTotal() - $orderProduct->getTotal());
             $this->orderRepository->update($order);
             $this->orderProductRepository->remove($orderProduct, true);
