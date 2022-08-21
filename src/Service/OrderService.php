@@ -6,27 +6,30 @@ use App\Entity\Order;
 use App\Entity\OrderProduct;
 use App\Enums\OrderStoreStatus;
 use App\Helper\GeneralHelper;
+use App\Helper\RedirectHelper;
 use App\Repository\CustomerRepository;
 use App\Repository\OrderProductRepository;
 use App\Repository\OrderRepository;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Component\Serializer\SerializerInterface;
-
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class OrderService
 {
-    private $orderRepository, $customerRepository, $productRepository, $orderProductRepository, $serializer;
+    private $orderRepository, $customerRepository, $productRepository, $orderProductRepository, $serializer, $validator;
 
     public function __construct(OrderRepository     $orderRepository, CustomerRepository $customerRepository,
                                 ProductRepository   $productRepository, OrderProductRepository $orderProductRepository,
-                                SerializerInterface $serializer)
+                                SerializerInterface $serializer, ValidatorInterface $validator)
     {
         $this->orderRepository = $orderRepository;
         $this->customerRepository = $customerRepository;
         $this->productRepository = $productRepository;
         $this->orderProductRepository = $orderProductRepository;
         $this->serializer = $serializer;
+        $this->validator = $validator;
     }
 
     /**
@@ -40,12 +43,28 @@ class OrderService
     }
 
     /**
+     * Siparişe ürün ekleme veya mevcut ürünü güncelleme.
      * @param $attributes
-     * @return int
+     * @return int|array
      * @throws NonUniqueResultException
      */
-    public function store($attributes): int
+    public function store($attributes)
     {
+        $errors = $this->validator->validate($attributes, new Assert\Collection([
+            'product_id' => [
+                new Assert\NotBlank(),
+                new Assert\Type('integer'),
+            ],
+            'quantity' => [
+                new Assert\NotBlank(),
+                new Assert\Type('integer'),
+            ]
+        ]));
+
+        if (count($errors) > 0) {
+            return GeneralHelper::getErrorMessages($errors);
+        }
+
         $order = $this->getDefaultOrder();
         $product = $this->productRepository->findOneBy([
             'id' => $attributes['product_id']
@@ -92,6 +111,26 @@ class OrderService
             return OrderStoreStatus::SUCCESS;
         }
         return OrderStoreStatus::ERROR;
+    }
+
+    /**
+     * @param $productId
+     * @return bool
+     * @throws NonUniqueResultException
+     */
+    public function removeByProductId($productId): bool
+    {
+        $order = $this->getDefaultOrder();
+        $orderProduct = $this->orderProductRepository->findOneBy([
+            'order' => $order->getId(),
+            'product' => $productId
+        ]);
+
+        if($orderProduct){
+            $this->orderProductRepository->remove($orderProduct, true);
+            return true;
+        }
+        return false;
     }
 
     /**
