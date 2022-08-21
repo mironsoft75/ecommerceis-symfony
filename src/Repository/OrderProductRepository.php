@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\OrderProduct;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Exception;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -16,35 +17,51 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class OrderProductRepository extends ServiceEntityRepository
 {
+    /**
+     * @throws Exception
+     */
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, OrderProduct::class);
+        $this->_em->getConnection()->beginTransaction();
     }
 
+    /**
+     * @throws Exception
+     */
     public function add(OrderProduct $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
         if ($flush) {
             $this->getEntityManager()->flush();
+            $this->_em->getConnection()->commit();
         }
     }
 
+    /**
+     * @throws Exception
+     */
     public function remove(OrderProduct $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 
         if ($flush) {
             $this->getEntityManager()->flush();
+            $this->_em->getConnection()->commit();
         }
     }
 
+    /**
+     * @throws Exception
+     */
     public function update(OrderProduct $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
         if ($flush) {
             $this->getEntityManager()->flush();
+            $this->_em->getConnection()->commit();
         }
     }
 
