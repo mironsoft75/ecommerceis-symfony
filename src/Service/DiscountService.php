@@ -42,7 +42,8 @@ class DiscountService extends BaseService
      */
     public function getResult(): array
     {
-        $this->percentOverPrice();
+        $this->percentOverPrice(); //Toplam sipariş fiyatlarına göre indirimler yapılır.
+        $this->freePieceByCategoryAndSoldPiece(); //Belirli Kategorideki ve Satış adetine göre ücretsiz verilecek adet düşülür
 
         return [
             'order_id' => $this->order->getId(),
@@ -56,7 +57,7 @@ class DiscountService extends BaseService
     private function getOrderTotal()
     {
         $this->discountedTotal = 0;
-        foreach ($this->orderProducts as $orderProduct){
+        foreach ($this->orderProducts as $orderProduct) {
             $this->discountedTotal += $orderProduct->getTotal();
             $this->orderTotal += $orderProduct->getTotal();
         }
@@ -83,6 +84,38 @@ class DiscountService extends BaseService
                     "discountAmount" => $discountAmount,
                     "subtotal" => $this->discountedTotal
                 ];
+            }
+        }
+    }
+
+    /**
+     * Belirlenen kategori bilgisine ve satın aldığı adete göre düşülecek olan adet fiyat bilgisini indirime ekler.
+     * @return void
+     */
+    private function freePieceByCategoryAndSoldPiece()
+    {
+        $discountDetails = $this->discountRepository->findBy([
+            'type' => DiscountType::FREE_PIECE_BY_CATEGORY_AND_SOLD_PIECE
+        ]);
+
+        foreach ($discountDetails as $discountDetail) {
+            $jsonData = $discountDetail->getJsonData();
+
+            foreach ($this->orderProducts as $orderProduct) {
+                if ($orderProduct->getProduct()->getCategory()->getId() == $jsonData['categoryId']
+                    && $orderProduct->getQuantity() >= $jsonData['buyPiece']) {
+
+                    $discountAmount = round($orderProduct->getUnitPrice() * $jsonData['freePiece'], 2);
+                    $this->discountedTotal = round($this->discountedTotal - $discountAmount, 2);
+                    $this->totalDiscount = round($this->totalDiscount + $discountAmount, 2);
+
+                    $this->discountMessages[] = [
+                        "discountReason" => $this->discountTypes[DiscountType::FREE_PIECE_BY_CATEGORY_AND_SOLD_PIECE],
+                        "discountAmount" => $discountAmount,
+                        "subtotal" => $this->discountedTotal
+                    ];
+                    break;
+                }
             }
         }
     }
