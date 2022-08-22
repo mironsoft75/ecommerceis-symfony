@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Order;
+use App\Enums\DiscountStatus;
 use App\Enums\DiscountType;
 use App\Helper\CalculationHelper;
 use App\Repository\DiscountRepository;
@@ -71,7 +72,8 @@ class DiscountService extends BaseService
     private function percentOverPrice()
     {
         $discountDetails = $this->discountRepository->findBy([
-            'type' => DiscountType::PERCENT_OVER_PRICE
+            'type' => DiscountType::PERCENT_OVER_PRICE,
+            'status' => DiscountStatus::ACTIVE
         ]);
 
         foreach ($discountDetails as $discountDetail) {
@@ -96,7 +98,8 @@ class DiscountService extends BaseService
     private function freePieceByCategoryAndSoldPiece()
     {
         $discountDetails = $this->discountRepository->findBy([
-            'type' => DiscountType::FREE_PIECE_BY_CATEGORY_AND_SOLD_PIECE
+            'type' => DiscountType::FREE_PIECE_BY_CATEGORY_AND_SOLD_PIECE,
+            'status' => DiscountStatus::ACTIVE
         ]);
 
         foreach ($discountDetails as $discountDetail) {
@@ -128,7 +131,8 @@ class DiscountService extends BaseService
     public function percentByCategoryAndSoldCheapest()
     {
         $discountDetails = $this->discountRepository->findBy([
-            'type' => DiscountType::PERCENT_CATEGORY_SOLD_CHEAPEST
+            'type' => DiscountType::PERCENT_CATEGORY_SOLD_CHEAPEST,
+            'status' => DiscountStatus::ACTIVE
         ]);
 
         foreach ($discountDetails as $discountDetail) {
