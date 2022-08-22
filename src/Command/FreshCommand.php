@@ -21,9 +21,8 @@ class FreshCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addArgument('arg1', InputArgument::OPTIONAL, 'Argument description')
-            ->addOption('option1', null, InputOption::VALUE_NONE, 'Option description')
-        ;
+            //->addArgument('arg1', InputArgument::OPTIONAL, 'Argument description')
+            ->addOption('seed', null, InputOption::VALUE_NONE, 'Seed');
     }
 
     private $kernel;
@@ -42,27 +41,45 @@ class FreshCommand extends Command
         $application->setAutoExit(false);
 
         $io->info('doctrine:migrations:migrate first running...');
-        $input = new ArrayInput([
+        $arrayInput = new ArrayInput([
             'command' => 'doctrine:migrations:migrate',
             'version' => 'first',
             '--no-interaction' => ''
         ]);
 
         $output = new BufferedOutput();
-        $application->run($input, $output);
+        $application->run($arrayInput, $output);
         $content = $output->fetch();
         $io->success($content);
 
         $io->info('doctrine:migrations:migrate running...');
 
-        $input = new ArrayInput([
+        $arrayInput = new ArrayInput([
             'command' => 'doctrine:migrations:migrate',
             '--no-interaction' => ''
         ]);
 
-        $application->run($input, $output);
+        $application->run($arrayInput, $output);
         $content = $output->fetch();
-        $io->success($content);
+        if(strpos($content,'Execution. Error: "An exception occurred while executing a query') === false){
+            $io->success($content);
+
+            if ($input->hasOption('seed')) {
+                $io->info('doctrine:fixtures:load running...');
+                $arrayInput = new ArrayInput([
+                    'command' => 'doctrine:fixtures:load',
+                    '--no-interaction' => ''
+                ]);
+
+                $output = new BufferedOutput();
+                $application->run($arrayInput, $output);
+                $content = $output->fetch();
+                $io->success($content);
+            }
+        }else{
+            $io->error($content);
+            $io->warning('Please, try again :)');
+        }
 
         return Command::SUCCESS;
     }

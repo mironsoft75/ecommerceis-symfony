@@ -144,11 +144,6 @@ class OrderService extends BaseService
 
     public function discount(): array
     {
-        /**
-         * Buradaki her algoritma metotlara ayrılabilir ben bilerek ayırmadım
-         * Metotlara ayrıldığında tüm kontroller için daha fazla çok döngüye sahip olmuş oluyor buda daha fazla işlem
-         * yapacağı anlamına geliyor. Tercihler kişiye göre değişebilir burada performans odaklı ilerlenmiştir
-         */
 
         $order = $this->repository->getDefaultOrder();
         $discountedTotal = $order->total;
