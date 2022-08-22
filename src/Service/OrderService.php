@@ -11,7 +11,6 @@ use App\Repository\OrderProductRepository;
 use App\Repository\OrderRepository;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -45,7 +44,8 @@ class OrderService extends BaseService
     }
 
     /**
-     * @throws NonUniqueResultException
+     * Siparişe ait tüm ürünleri listeleme
+     * @return mixed
      */
     public function index()
     {
@@ -112,15 +112,7 @@ class OrderService extends BaseService
                     $this->orderProductRepository->add($orderProduct, true);
                 }
 
-                //Siparis toplaminin guncellenmesi
-                $orderTotal = 0;
-                foreach ($order->getOrderProducts() as $orderProduct) {
-                    $orderTotal += $orderProduct->getTotal();
-                }
-
-                $order->setTotal($orderTotal);
-                $this->orderRepository->update($order, true);
-
+                $this->updateOrderTotal($order);
                 return OrderStoreStatus::SUCCESS;
             }
             return OrderStoreStatus::ERROR;
@@ -134,7 +126,7 @@ class OrderService extends BaseService
      */
     public function removeByProductId($productId): bool
     {
-        return $this->em->transactional(function ($em) use ($productId){
+        return $this->em->transactional(function ($em) use ($productId) {
             $order = $this->getDefaultOrder();
             $orderProduct = $this->orderProductRepository->findOneBy([
                 'order' => $order->getId(),
@@ -142,31 +134,11 @@ class OrderService extends BaseService
             ]);
 
             if ($orderProduct) {
-                $order->setTotal($order->getTotal() - $orderProduct->getTotal());
-                $this->orderRepository->update($order);
                 $this->orderProductRepository->remove($orderProduct, true);
+                $this->updateOrderTotal($order);
                 return true;
             }
             return false;
-        });
-    }
-
-    /**
-     * Müşteriye ait sipariş kaydı varsa döner yoksa oluşturup döner. (FirstOrCreate)
-     */
-    public function getDefaultOrder(): Order
-    {
-        return $this->em->transactional(function ($em) {
-            $firstOrder = $this->orderRepository->getDefaultOrder();
-            if (is_null($firstOrder)) {
-                $customer = $this->customerRepository->findOneBy(['id' => getCustomerId()]);
-                $order = new Order();
-                $order->setTotal(0);
-                $order->setCustomer($customer);
-                $this->orderRepository->add($order, true);
-                return $this->getDefaultOrder();
-            }
-            return $firstOrder;
         });
     }
 
@@ -253,5 +225,41 @@ class OrderService extends BaseService
             "totalDiscount" => $totalDiscount,
             "discountedTotal" => $discountedTotal
         ];
+    }
+
+    /**
+     * Müşteriye ait sipariş kaydı varsa döner yoksa oluşturup döner. (FirstOrCreate)
+     */
+    public function getDefaultOrder(): Order
+    {
+        return $this->em->transactional(function ($em) {
+            $firstOrder = $this->orderRepository->getDefaultOrder();
+            if (is_null($firstOrder)) {
+                $customer = $this->customerRepository->findOneBy(['id' => getCustomerId()]);
+                $order = new Order();
+                $order->setTotal(0);
+                $order->setCustomer($customer);
+                $this->orderRepository->add($order, true);
+                return $this->getDefaultOrder();
+            }
+            return $firstOrder;
+        });
+    }
+
+    /**
+     * Siparişin toplam bilgisini günceller
+     * @param Order|null $order
+     * @return void
+     */
+    public function updateOrderTotal(Order $order = null)
+    {
+        $order = $order ?? $this->getDefaultOrder();
+        $orderTotal = 0;
+        foreach ($order->getOrderProducts() as $orderProduct) {
+            $orderTotal += $orderProduct->getTotal();
+        }
+
+        $order->setTotal($orderTotal);
+        $this->orderRepository->update($order, true);
     }
 }
