@@ -16,9 +16,15 @@ CREATE DATABASE ecommerce
 php bin/console doctrine:migrations:migrate
 ```
 
-### Seed & Fresh / Fixtures ( Dummy Data )
+### Seed ( Dummy Data )
 ```
 php bin/console doctrine:fixtures:load
+```
+
+### Migrate Fresh & Seed
+Veritabanını dummy data ile birlikte tekrar oluşturmak için
+```
+php bin/console doctrine:migrations:migrate --seed
 ```
 
 ## About

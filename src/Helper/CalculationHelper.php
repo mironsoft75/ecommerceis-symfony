@@ -13,10 +13,10 @@ class CalculationHelper
     /**
      * @param $val
      * @param $percent
-     * @return float|int
+     * @return float
      */
-    public static function calculatePercent($val, $percent)
+    public static function calculatePercent($val, $percent): float
     {
-        return ($val / 100) * $percent;
+        return round((($val / 100) * $percent),2);
     }
 }

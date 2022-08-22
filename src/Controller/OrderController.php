@@ -70,11 +70,12 @@ class OrderController extends AbstractController
     }
 
     /**
+     * Sipariş bilgilerine göre indirimleri hesaplar
      * @Route ("/orders/discount", name="order_discount", methods={"GET"})
      * @return JsonResponse
      */
     public function discount(): JsonResponse
     {
-
+        return RedirectHelper::success($this->orderService->discount());
     }
 }

@@ -21,10 +21,12 @@ class OrderService extends BaseService
     private CustomerRepository $customerRepository;
     private ProductRepository $productRepository;
     private OrderProductRepository $orderProductRepository;
+    private DiscountService $discountService;
 
     public function __construct(OrderRepository        $orderRepository, CustomerRepository $customerRepository,
                                 ProductRepository      $productRepository, OrderProductRepository $orderProductRepository,
                                 SerializerInterface    $serializer, ValidatorInterface $validator,
+                                DiscountService        $discountService,
                                 EntityManagerInterface $em)
     {
         $this->orderRepository = $orderRepository;
@@ -35,6 +37,7 @@ class OrderService extends BaseService
         $this->serializer = $serializer;
         $this->validator = $validator;
         $this->em = $em;
+        $this->discountService = $discountService;
 
         $this->orderRepository->setEntityManager($this->em);
         $this->customerRepository->setEntityManager($this->em);
@@ -142,84 +145,13 @@ class OrderService extends BaseService
         });
     }
 
+    /**
+     * Sipariş bilgilerine göre indirimleri hesaplar
+     * @return array
+     */
     public function discount(): array
     {
-
-        $order = $this->repository->getDefaultOrder();
-        $discountedTotal = $order->total;
-        $totalDiscount = 0;
-        $discount = [];
-
-        $total1000 = 0;
-        $justOneTimeCategory2Sold6Free1Status = false;
-        $category1Sold2Count = 0;
-        $category1Sold2CheapestPrice = 0;
-        foreach ($order->products as $product) {
-
-            //10_PERCENT_OVER_1000
-            $total1000 += $product->pivot->total;
-
-            //CATEGORY_2_SOLD_6_FREE_1
-            if ($justOneTimeCategory2Sold6Free1Status === false && $product->category_id == 2) {
-                if ($product->pivot->quantity === 6) { //6 adet alındığından dendiğinden dolayı sadece 6 adet.
-                    $justOneTimeCategory2Sold6Free1Status = true;
-                    $discountedTotal = round($discountedTotal - $product->pivot->unit_price);
-                    $discountAmount = round($product->pivot->unit_price, 2);
-                    $discount[] = [
-                        "discountReason" => "CATEGORY_2_SOLD_6_FREE_1",
-                        "discountAmount" => $discountAmount,
-                        "subtotal" => $discountedTotal
-                    ];
-
-                    $totalDiscount = round($totalDiscount + $discountAmount, 2);
-                }
-            }
-
-            //CATEGORY_1_SOLD_2_CHEAPEST
-            if ($product->category_id == 1) {
-                if ($category1Sold2CheapestPrice == 0) { //set default min price
-                    $category1Sold2CheapestPrice = $product->pivot->unit_price;
-                } else if ($category1Sold2CheapestPrice > $product->pivot->unit_price) { //detect min price
-                    $category1Sold2CheapestPrice = $product->pivot->unit_price;
-                }
-                $category1Sold2Count++;
-            }
-        }
-
-        //10_PERCENT_OVER_1000 //Toplam sipariş bilgisinden de kontrol edilebilirdi ancak hesaplama istendiği için eklendi.
-        if ($total1000 >= 1000) {
-            $percent = round(calculatePercent($discountedTotal, 10), 2);
-            $discountedTotal = round($discountedTotal - $percent, 2);
-            $discountAmount = $percent;
-            $discount[] = [
-                "discountReason" => "10_PERCENT_OVER_1000",
-                "discountAmount" => $discountAmount,
-                "subtotal" => $discountedTotal
-            ];
-
-            $totalDiscount = round($totalDiscount + $discountAmount, 2);
-        }
-
-        //CATEGORY_1_SOLD_2_CHEAPEST
-        if ($category1Sold2Count >= 2) {
-            $percent = round(calculatePercent($category1Sold2CheapestPrice, 20), 2);
-            $discountedTotal = round($discountedTotal - $percent, 2);
-            $discountAmount = $percent;
-            $discount[] = [
-                "discountReason" => "CATEGORY_1_SOLD_2_CHEAPEST",
-                "discountAmount" => $discountAmount,
-                "subtotal" => $discountedTotal
-            ];
-
-            $totalDiscount = round($totalDiscount + $discountAmount, 2);
-        }
-
-        return [
-            'order_id' => $order->id,
-            'discount' => $discount,
-            "totalDiscount" => $totalDiscount,
-            "discountedTotal" => $discountedTotal
-        ];
+        return $this->discountService->getResult();
     }
 
     /**

@@ -96,9 +96,9 @@ class Discount
         return $this;
     }
 
-    public function getJsonData(): ?string
+    public function getJsonData(): array
     {
-        return $this->jsonData;
+        return json_decode($this->jsonData, true);
     }
 
     public function setJsonData(string $jsonData): self
