@@ -30,3 +30,10 @@ php bin/console doctrine:migrations:migrate --seed
 ## About
 Postman API ve Example Request için:\
 https://documenter.getpostman.com/view/22844490/VUqmvJvC
+
+### Preview
+#### Database
+![db!](./docs/db.png)
+
+#### Postman API
+![postman!](./docs/postman.png)
