@@ -8,7 +8,7 @@ abstract class DiscountType
 {
     const PERCENT_OVER_PRICE = 1;
     const FREE_PIECE_BY_CATEGORY_AND_SOLD_PIECE = 2;
-    const PERCENT_20_CATEGORY_1_SOLD_2_CHEAPEST = 3;
+    const PERCENT_CATEGORY_SOLD_CHEAPEST = 3;
 
     private static $constCacheArray = NULL;
 

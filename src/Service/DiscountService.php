@@ -43,7 +43,8 @@ class DiscountService extends BaseService
     public function getResult(): array
     {
         $this->percentOverPrice(); //Toplam sipariş fiyatlarına göre indirimler yapılır.
-        $this->freePieceByCategoryAndSoldPiece(); //Belirli Kategorideki ve Satış adetine göre ücretsiz verilecek adet düşülür
+        $this->freePieceByCategoryAndSoldPiece(); //Belirli Kategorideki ve belirli satış adetine göre ücretsiz verilecek adet düşülür
+        $this->percentByCategoryAndSoldCheapest(); //Kategori ve satış adetine göre en ucuz üründen belirlen yüzde kadar indirim yapılır.
 
         return [
             'order_id' => $this->order->getId(),
@@ -103,7 +104,7 @@ class DiscountService extends BaseService
 
             foreach ($this->orderProducts as $orderProduct) {
                 if ($orderProduct->getProduct()->getCategory()->getId() == $jsonData['categoryId']
-                    && $orderProduct->getQuantity() >= $jsonData['buyPiece']) {
+                    && $orderProduct->getQuantity() == $jsonData['buyPiece']) {
 
                     $discountAmount = round($orderProduct->getUnitPrice() * $jsonData['freePiece'], 2);
                     $this->discountedTotal = round($this->discountedTotal - $discountAmount, 2);
@@ -116,6 +117,47 @@ class DiscountService extends BaseService
                     ];
                     break;
                 }
+            }
+        }
+    }
+
+    /**
+     * Belirli kategori ve satış adetine göre en ucuz üründen belirlenen yüzde kadar indirim yapılır.
+     * @return void
+     */
+    public function percentByCategoryAndSoldCheapest()
+    {
+        $discountDetails = $this->discountRepository->findBy([
+            'type' => DiscountType::PERCENT_CATEGORY_SOLD_CHEAPEST
+        ]);
+
+        foreach ($discountDetails as $discountDetail) {
+            $jsonData = $discountDetail->getJsonData();
+
+            $minBuyPrice = 0;
+            foreach ($this->orderProducts as $orderProduct) {
+                if ($orderProduct->getProduct()->getCategory()->getId() == $jsonData['categoryId'] &&
+                    $orderProduct->getQuantity() >= $jsonData['minBuyPiece']) {
+
+                    dump($orderProduct->getUnitPrice());
+                    if ($minBuyPrice == 0) { //default min product price
+                        $minBuyPrice = $orderProduct->getUnitPrice();
+                    } else if ($minBuyPrice > $orderProduct->getUnitPrice()) { //detect min price
+                        $minBuyPrice = $orderProduct->getUnitPrice();
+                    }
+                }
+            }
+
+            if ($minBuyPrice != 0) {
+                $discountAmount = round(CalculationHelper::calculatePercent($minBuyPrice, $jsonData['percent']), 2);
+                $this->discountedTotal = round($this->discountedTotal - $discountAmount, 2);
+                $this->totalDiscount = round($this->totalDiscount + $discountAmount, 2);
+
+                $this->discountMessages[] = [
+                    "discountReason" => $this->discountTypes[DiscountType::PERCENT_CATEGORY_SOLD_CHEAPEST],
+                    "discountAmount" => $discountAmount,
+                    "subtotal" => $this->discountedTotal
+                ];
             }
         }
     }

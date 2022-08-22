@@ -43,7 +43,7 @@ class DiscountFixtures extends Fixture
         $discount->setDescription('1 ID\'li kategoriden iki veya daha fazla ürün satın alındığında, en ucuz ürüne %20 indirim yapılır.');
         $data = [
             'categoryId' => 1,
-            'mınBuyPiece' => 2,
+            'minBuyPiece' => 2,
             'percent' => 20
         ];
         $discount->setJsonData(json_encode($data));
