@@ -4,7 +4,7 @@ namespace App\Service;
 
 use App\Entity\Order;
 use App\Entity\OrderProduct;
-use App\Enums\OrderStoreStatus;
+use App\Enum\OrderStoreStatus;
 use App\Helper\GeneralHelper;
 use App\Repository\CustomerRepository;
 use App\Repository\OrderProductRepository;

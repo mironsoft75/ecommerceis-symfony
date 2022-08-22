@@ -3,7 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\Discount;
-use App\Enums\DiscountStatus;
+use App\Enum\DiscountStatus;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 

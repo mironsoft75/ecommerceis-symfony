@@ -3,8 +3,8 @@
 namespace App\Service;
 
 use App\Entity\Order;
-use App\Enums\DiscountStatus;
-use App\Enums\DiscountType;
+use App\Enum\DiscountStatus;
+use App\Enum\DiscountType;
 use App\Helper\CalculationHelper;
 use App\Repository\DiscountRepository;
 use App\Repository\OrderRepository;

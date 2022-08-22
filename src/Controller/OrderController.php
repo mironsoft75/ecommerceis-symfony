@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Enums\OrderStoreStatus;
+use App\Enum\OrderStoreStatus;
 use App\Helper\GeneralHelper;
 use App\Helper\RedirectHelper;
 use App\Service\OrderService;
