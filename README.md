@@ -79,5 +79,8 @@ https://documenter.getpostman.com/view/22844490/VUqmvJvC
 #### Database
 ![db!](./docs/db.png)
 
+#### Repository Design Pattern
+![db!](./docs/rdp.png)
+
 #### Postman API
 ![postman!](./docs/postman.png)
