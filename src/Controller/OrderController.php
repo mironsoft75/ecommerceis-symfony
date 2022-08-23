@@ -41,17 +41,13 @@ class OrderController extends AbstractController
     {
         $attributes = GeneralHelper::getJson($request);
         $status = $this->orderService->store($attributes);
-        if (is_array($status)) {
-            return RedirectHelper::badRequest($status);
-        } else {
-            switch ($status) {
-                case OrderStoreStatus::SUCCESS:
-                    return RedirectHelper::store();
-                case OrderStoreStatus::PRODUCT_STOCK:
-                    return RedirectHelper::badRequest(null, 'products.stock');
-                default: //OrderStoreStatus::ERROR
-                    return RedirectHelper::badRequest();
-            }
+        switch ($status) {
+            case OrderStoreStatus::SUCCESS:
+                return RedirectHelper::store();
+            case OrderStoreStatus::PRODUCT_STOCK:
+                return RedirectHelper::badRequest(null, 'products.stock');
+            default: //OrderStoreStatus::ERROR
+                return RedirectHelper::badRequest();
         }
     }
 

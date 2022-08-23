@@ -38,12 +38,6 @@ class OrderService extends BaseService
         $this->validator = $validator;
         $this->em = $em;
         $this->discountService = $discountService;
-
-        $this->orderRepository->setEntityManager($this->em);
-        $this->customerRepository->setEntityManager($this->em);
-        $this->productRepository->setEntityManager($this->em);
-        $this->orderProductRepository->setEntityManager($this->em);
-
     }
 
     /**
@@ -64,23 +58,7 @@ class OrderService extends BaseService
      */
     public function store($attributes)
     {
-        return $this->em->transactional(function ($em) use ($attributes) {
-
-            $errors = $this->validator->validate($attributes, new Assert\Collection([
-                'product_id' => [
-                    new Assert\NotBlank(),
-                    new Assert\Type('integer'),
-                ],
-                'quantity' => [
-                    new Assert\NotBlank(),
-                    new Assert\Type('integer'),
-                ]
-            ]));
-
-            if (count($errors) > 0) {
-                return GeneralHelper::getErrorMessages($errors);
-            }
-
+        return $this->em->transactional(function () use ($attributes) {
             $order = $this->getDefaultOrder();
             $product = $this->productRepository->findOneBy([
                 'id' => $attributes['product_id']
@@ -115,7 +93,7 @@ class OrderService extends BaseService
                     $this->orderProductRepository->add($orderProduct, true);
                 }
 
-                $this->updateOrderTotal($order);
+                $this->updateOrderTotal($order); //ürün toplam fiyatının güncellenmesi.
                 return OrderStoreStatus::SUCCESS;
             }
             return OrderStoreStatus::ERROR;

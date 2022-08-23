@@ -53,6 +53,7 @@ class OrderProduct
     /**
      * @ORM\Column(type="integer")
      * @Groups({"orderProduct"})
+     * @Assert\NotBlank
      * @Assert\Type(
      *     type="integer",
      *     message="The value {{ value }} is not a valid {{ type }}."
