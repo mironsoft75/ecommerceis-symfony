@@ -12,31 +12,27 @@ use App\Repository\OrderRepository;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class OrderService extends BaseService
 {
-    private OrderRepository $orderRepository;
-    private CustomerRepository $customerRepository;
-    private ProductRepository $productRepository;
-    private OrderProductRepository $orderProductRepository;
+    private OrderProductService $orderProductService;
+    private ProductService $productService;
+    private CustomerService $customerService;
     private DiscountService $discountService;
 
-    public function __construct(OrderRepository        $orderRepository, CustomerRepository $customerRepository,
-                                ProductRepository      $productRepository, OrderProductRepository $orderProductRepository,
-                                SerializerInterface    $serializer, ValidatorInterface $validator,
-                                DiscountService        $discountService,
+    public function __construct(OrderRepository        $repository, SerializerInterface $serializer,
+                                OrderProductService    $orderProductService, ProductService $productService,
+                                CustomerService        $customerService, DiscountService $discountService,
                                 EntityManagerInterface $em)
     {
-        $this->orderRepository = $orderRepository;
-        $this->customerRepository = $customerRepository;
-        $this->productRepository = $productRepository;
-        $this->orderProductRepository = $orderProductRepository;
-
+        $this->repository = $repository;
         $this->serializer = $serializer;
-        $this->validator = $validator;
         $this->em = $em;
+
+        $this->orderProductService = $orderProductService;
+        $this->productService = $productService;
+        $this->customerService = $customerService;
         $this->discountService = $discountService;
     }
 
@@ -53,14 +49,15 @@ class OrderService extends BaseService
 
     /**
      * Siparişe ürün ekleme veya mevcut ürünü güncelleme.
-     * @param $attributes
+     * @param array $attributes
      * @return mixed
      */
-    public function store($attributes)
+    public function storeProduct(array $attributes)
     {
         return $this->em->transactional(function () use ($attributes) {
             $order = $this->getDefaultOrder();
-            $product = $this->productRepository->findOneBy([
+
+            $product = $this->productService->findOneBy([
                 'id' => $attributes['product_id']
             ]);
 
@@ -69,31 +66,34 @@ class OrderService extends BaseService
                     return OrderStoreStatus::PRODUCT_STOCK;
                 }
 
-                $total = $product->getPrice() * $attributes['quantity']; // ürünün toplam fıyatı.
+                $productTotal = $product->getPrice() * $attributes['quantity']; // ürünün toplam fıyatı.
 
-                $orderProduct = $this->orderProductRepository->findOneBy( //aynı ürün daha önce eklenmiş mi ?
+                $orderProduct = $this->orderProductService->findOneBy( //aynı ürün daha önce eklenmiş mi ?
                     [
                         'order' => $order->getId(),
                         'product' => $product->getId()
                     ]
                 );
 
+                //TODO: fonksiyona cevrilecek
                 if ($orderProduct) { //aynı ürün daha önce eklenmişse güncelleme yapılır.
                     $orderProduct->setQuantity($attributes['quantity']);
                     $orderProduct->setUnitPrice($product->getPrice());
-                    $orderProduct->setTotal($total);
-                    $this->orderProductRepository->update($orderProduct, true);
+                    $orderProduct->setTotal($productTotal);
+                    $this->orderProductService->update($orderProduct, true);
                 } else { //aynı ürün daha önce siparişe eklenmediyse ürünü siparişe ekleme yapılır
                     $orderProduct = new OrderProduct();
                     $orderProduct->setOrder($order);
                     $orderProduct->setProduct($product);
                     $orderProduct->setQuantity($attributes['quantity']);
                     $orderProduct->setUnitPrice($product->getPrice());
-                    $orderProduct->setTotal($total);
-                    $this->orderProductRepository->add($orderProduct, true);
+                    $orderProduct->setTotal($productTotal);
+                    $this->orderProductService->store($orderProduct, true);
                 }
 
-                $this->updateOrderTotal($order); //ürün toplam fiyatının güncellenmesi.
+                //TODO: quantity degistiginde total guncellenecek
+                $order->setTotal($order->getTotal() + $productTotal); //Order Total bilgisinin güncellenmesi
+                $this->update($order, true); //ürün toplam fiyatının güncellenmesi.
                 return OrderStoreStatus::SUCCESS;
             }
             return OrderStoreStatus::ERROR;
@@ -107,16 +107,18 @@ class OrderService extends BaseService
      */
     public function removeByProductId($productId): bool
     {
-        return $this->em->transactional(function ($em) use ($productId) {
+        return $this->em->transactional(function () use ($productId) {
             $order = $this->getDefaultOrder();
-            $orderProduct = $this->orderProductRepository->findOneBy([
+
+            $orderProduct = $this->orderProductService->findOneBy([
                 'order' => $order->getId(),
                 'product' => $productId
             ]);
 
             if ($orderProduct) {
-                $this->orderProductRepository->remove($orderProduct, true);
-                $this->updateOrderTotal($order);
+                $order->setTotal($order->getTotal() - $orderProduct->getTotal());
+                $this->update($order, true);
+                $this->orderProductService->remove($orderProduct, true);
                 return true;
             }
             return false;
@@ -137,34 +139,17 @@ class OrderService extends BaseService
      */
     public function getDefaultOrder(): Order
     {
-        return $this->em->transactional(function ($em) {
-            $firstOrder = $this->orderRepository->getDefaultOrder();
+        return $this->em->transactional(function () {
+            $firstOrder = $this->repository->getDefaultOrder();
             if (is_null($firstOrder)) {
-                $customer = $this->customerRepository->findOneBy(['id' => getCustomerId()]);
+                $customer = $this->customerService->findOneBy(['id' => getCustomerId()]);
                 $order = new Order();
                 $order->setTotal(0);
                 $order->setCustomer($customer);
-                $this->orderRepository->add($order, true);
+                $this->repository->add($order, true);
                 return $this->getDefaultOrder();
             }
             return $firstOrder;
         });
-    }
-
-    /**
-     * Siparişin toplam bilgisini günceller
-     * @param Order|null $order
-     * @return void
-     */
-    public function updateOrderTotal(Order $order = null)
-    {
-        $order = $order ?? $this->getDefaultOrder();
-        $orderTotal = 0;
-        foreach ($order->getOrderProducts() as $orderProduct) {
-            $orderTotal += $orderProduct->getTotal();
-        }
-
-        $order->setTotal($orderTotal);
-        $this->orderRepository->update($order, true);
     }
 }

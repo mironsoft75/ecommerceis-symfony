@@ -11,14 +11,18 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class OrderController extends AbstractController
 {
     private OrderService $orderService;
+    private ValidatorInterface $validator;
 
-    public function __construct(OrderService $orderService)
+    public function __construct(OrderService $orderService, ValidatorInterface $validator)
     {
         $this->orderService = $orderService;
+        $this->validator = $validator;
     }
 
     /**
@@ -33,14 +37,29 @@ class OrderController extends AbstractController
 
     /**
      * Siparişe ürün ekleme veya mevcut ürünü güncelleme.
-     * @Route ("/orders", name="order_store", methods={"POST"})
+     * @Route ("/orders/product", name="order_store_product", methods={"POST"})
      * @param Request $request
      * @return JsonResponse
      */
-    public function store(Request $request): JsonResponse
+    public function storeProduct(Request $request): JsonResponse
     {
         $attributes = GeneralHelper::getJson($request);
-        $status = $this->orderService->store($attributes);
+        $errors = $this->validator->validate($attributes, new Assert\Collection([
+            'product_id' => [
+                new Assert\NotBlank(),
+                new Assert\Type('integer'),
+            ],
+            'quantity' => [
+                new Assert\NotBlank(),
+                new Assert\Type('integer'),
+            ]
+        ]));
+
+        if (count($errors) > 0) {
+            return RedirectHelper::badRequest(GeneralHelper::getErrorMessages($errors));
+        }
+
+        $status = $this->orderService->storeProduct($attributes);
         switch ($status) {
             case OrderStoreStatus::SUCCESS:
                 return RedirectHelper::store();

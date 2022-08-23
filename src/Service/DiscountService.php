@@ -24,6 +24,7 @@ class DiscountService extends BaseService
 
     public function __construct(DiscountRepository $discountRepository, OrderRepository $orderRepository)
     {
+        //TODO: Design Pattern ile guncellencek
         $this->discountRepository = $discountRepository;
         $this->orderRepository = $orderRepository;
         $this->order = $this->orderRepository->getDefaultOrder(); //Sipariş bilgisi
