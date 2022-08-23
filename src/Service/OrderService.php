@@ -75,20 +75,20 @@ class OrderService extends BaseService
                     ]
                 );
 
-                //TODO: fonksiyona cevrilecek
                 if ($orderProduct) { //aynı ürün daha önce eklenmişse güncelleme yapılır.
-                    $orderProduct->setQuantity($attributes['quantity']);
-                    $orderProduct->setUnitPrice($product->getPrice());
-                    $orderProduct->setTotal($productTotal);
-                    $this->orderProductService->update($orderProduct, true);
+                    $this->orderProductService->update($orderProduct, [
+                        'quantity' => $attributes['quantity'],
+                        'unitPrice' => $product->getPrice(),
+                        'total' => $productTotal
+                    ]);
                 } else { //aynı ürün daha önce siparişe eklenmediyse ürünü siparişe ekleme yapılır
-                    $orderProduct = new OrderProduct();
-                    $orderProduct->setOrder($order);
-                    $orderProduct->setProduct($product);
-                    $orderProduct->setQuantity($attributes['quantity']);
-                    $orderProduct->setUnitPrice($product->getPrice());
-                    $orderProduct->setTotal($productTotal);
-                    $this->orderProductService->store($orderProduct, true);
+                    $this->orderProductService->store([
+                        'order' => $order,
+                        'product' => $product,
+                        'quantity' => $attributes['quantity'],
+                        'unitPrice' => $product->getPrice(),
+                        'total' => $productTotal
+                    ]);
                 }
 
                 //TODO: quantity degistiginde total guncellenecek
@@ -143,10 +143,10 @@ class OrderService extends BaseService
             $firstOrder = $this->repository->getDefaultOrder();
             if (is_null($firstOrder)) {
                 $customer = $this->customerService->findOneBy(['id' => getCustomerId()]);
-                $order = new Order();
-                $order->setTotal(0);
-                $order->setCustomer($customer);
-                $this->repository->add($order, true);
+                $this->store([
+                    'total' => 0,
+                    'customer' => $customer
+                ], true);
                 return $this->getDefaultOrder();
             }
             return $firstOrder;

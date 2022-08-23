@@ -22,7 +22,7 @@ class DiscountService extends BaseService
     private float $discountedTotal = 0; //Siparişten indirimi düştükten sonraki kalan sipariş toplamı
     private array $discountTypes = [];
 
-    public function __construct(DiscountRepository $discountRepository, OrderRepository $orderRepository)
+    /*public function __construct(DiscountRepository $discountRepository, OrderRepository $orderRepository)
     {
         //TODO: Design Pattern ile guncellencek
         $this->discountRepository = $discountRepository;
@@ -36,7 +36,7 @@ class DiscountService extends BaseService
 
         //Hangi indirim yöntemi ile düşüş yapıldığının bilgisini almak için
         $this->discountTypes = DiscountType::getFlipConstants();
-    }
+    }*/
 
     /**
      * İndirim algoritmalarına göre sonuçları döndürür.

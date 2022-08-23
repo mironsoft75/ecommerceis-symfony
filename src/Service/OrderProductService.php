@@ -12,15 +12,4 @@ class OrderProductService extends BaseService
     {
         $this->repository = $repository;
     }
-
-    /**
-     * //Örnek Override logic
-     * @param $orderProduct
-     * @param bool $flush
-     * @return void
-     */
-    public function update($orderProduct, bool $flush)
-    {
-        $this->update($orderProduct, $flush);
-    }
 }

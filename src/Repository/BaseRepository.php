@@ -18,15 +18,12 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 abstract class BaseRepository extends ServiceEntityRepository
 {
-    private string $entityClass;
-
     /**
      * @param ManagerRegistry $registry
      * @param string $entityClass
      */
     public function __construct(ManagerRegistry $registry, string $entityClass)
     {
-        $this->entityClass = $entityClass;
         parent::__construct($registry, $entityClass);
     }
 
@@ -79,14 +76,6 @@ abstract class BaseRepository extends ServiceEntityRepository
     public function setEntityManager(EntityManagerInterface $em)
     {
         $this->_em = $em;
-    }
-
-    /**
-     * @return string
-     */
-    public function getEntityClass(): string
-    {
-        return $this->entityClass;
     }
 
     /**

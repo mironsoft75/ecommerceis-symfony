@@ -11,12 +11,6 @@ class BaseService
     protected EntityManagerInterface $em;
     protected SerializerInterface $serializer;
     protected $repository;
-    protected string $entityClass;
-
-    public function __construct()
-    {
-        $this->entityClass = $this->repository->getEntityClass();
-    }
 
     /**
      * @param array $criteria
@@ -45,9 +39,10 @@ class BaseService
      * @param bool $flush
      * @return void
      */
-    public function store($attributes, bool $flush)
+    public function store($attributes, bool $flush = true)
     {
-        $entity = new $this->entityClass();
+        $entityClass = $this->repository->getClassName();
+        $entity = new $entityClass;
         foreach ($attributes as $key => $attribute) {
             $entity->{'set' . ucfirst($key)}($attribute);
         }
@@ -60,7 +55,7 @@ class BaseService
      * @param bool $flush
      * @return void
      */
-    public function update($entity, $attributes, bool $flush)
+    public function update($entity, $attributes, bool $flush = true)
     {
         foreach ($attributes as $key => $attribute) {
             $entity->{'set' . ucfirst($key)}($attribute);
@@ -73,7 +68,7 @@ class BaseService
      * @param bool $flush
      * @return void
      */
-    public function remove($entity, bool $flush)
+    public function remove($entity, bool $flush = true)
     {
         $this->repository->remove($entity, $flush);
     }
