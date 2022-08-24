@@ -7,13 +7,11 @@ use App\Enum\DiscountStatus;
 use App\Enum\DiscountType;
 use App\Helper\CalculationHelper;
 use App\Repository\DiscountRepository;
-use App\Repository\OrderRepository;
 use Doctrine\Common\Collections\Collection;
 
 class DiscountService extends BaseService
 {
-    private DiscountRepository $discountRepository;
-    private OrderRepository $orderRepository;
+    private OrderService $orderService;
     private ?Order $order;
     private Collection $orderProducts;
     private array $discountMessages = [];
@@ -22,12 +20,12 @@ class DiscountService extends BaseService
     private float $discountedTotal = 0; //Siparişten indirimi düştükten sonraki kalan sipariş toplamı
     private array $discountTypes = [];
 
-    /*public function __construct(DiscountRepository $discountRepository, OrderRepository $orderRepository)
+    public function __construct(DiscountRepository $repository, OrderService $orderService)
     {
         //TODO: Design Pattern ile guncellencek
-        $this->discountRepository = $discountRepository;
-        $this->orderRepository = $orderRepository;
-        $this->order = $this->orderRepository->getDefaultOrder(); //Sipariş bilgisi
+        $this->repository = $repository;
+        $this->orderService = $orderService;
+        $this->order = $this->orderService->getDefaultOrder(); //Sipariş bilgisi
         $this->orderProducts = $this->order->getOrderProducts(); //Siparişe ait ürün Listesi
 
         //*Toplam sipariş fiyatından indirimi düştükten sonrası kalan fiyat bilgisi
@@ -36,7 +34,7 @@ class DiscountService extends BaseService
 
         //Hangi indirim yöntemi ile düşüş yapıldığının bilgisini almak için
         $this->discountTypes = DiscountType::getFlipConstants();
-    }*/
+    }
 
     /**
      * İndirim algoritmalarına göre sonuçları döndürür.

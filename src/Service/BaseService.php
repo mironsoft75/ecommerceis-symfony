@@ -4,35 +4,12 @@ namespace App\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class BaseService
 {
     protected EntityManagerInterface $em;
     protected SerializerInterface $serializer;
     protected $repository;
-
-    /**
-     * @param array $criteria
-     * @param array|null $orderBy
-     * @return mixed
-     */
-    public function findOneBy(array $criteria, array $orderBy = null)
-    {
-        return $this->repository->findOneBy($criteria, $orderBy);
-    }
-
-    /**
-     * @param array $criteria
-     * @param array|null $orderBy
-     * @param $limit
-     * @param $offset
-     * @return void
-     */
-    public function findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
-    {
-        $this->repository->findBy($criteria, $orderBy, $limit, $offset);
-    }
 
     /**
      * @param $attributes
@@ -51,14 +28,16 @@ class BaseService
 
     /**
      * @param $entity
-     * @param $attributes
+     * @param array $attributes
      * @param bool $flush
      * @return void
      */
-    public function update($entity, $attributes, bool $flush = true)
+    public function update($entity, array $attributes = [], bool $flush = true)
     {
-        foreach ($attributes as $key => $attribute) {
-            $entity->{'set' . ucfirst($key)}($attribute);
+        if (count($attributes) > 0) {
+            foreach ($attributes as $key => $attribute) {
+                $entity->{'set' . ucfirst($key)}($attribute);
+            }
         }
         $this->repository->update($entity, $flush);
     }

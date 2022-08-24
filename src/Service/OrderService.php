@@ -4,15 +4,11 @@ namespace App\Service;
 
 use App\Entity\Order;
 use App\Entity\OrderProduct;
+use App\Entity\Product;
 use App\Enum\OrderStoreStatus;
-use App\Helper\GeneralHelper;
-use App\Repository\CustomerRepository;
-use App\Repository\OrderProductRepository;
 use App\Repository\OrderRepository;
-use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class OrderService extends BaseService
 {
@@ -37,6 +33,28 @@ class OrderService extends BaseService
     }
 
     /**
+     * @param array $criteria
+     * @param array|null $orderBy
+     * @return Order|null
+     */
+    public function getOrder(array $criteria, array $orderBy = null): ?Order
+    {
+        return $this->repository->findOneBy($criteria, $orderBy);
+    }
+
+    /**
+     * @param array $criteria
+     * @param array|null $orderBy
+     * @param $limit
+     * @param $offset
+     * @return Order[]
+     */
+    public function getOrderBy(array $criteria, array $orderBy = null, $limit = null, $offset = null): array
+    {
+        return $this->repository->findBy($criteria, $orderBy, $limit, $offset);
+    }
+
+    /**
      * Siparişe ait tüm ürünleri listeleme
      * @return mixed
      */
@@ -57,7 +75,7 @@ class OrderService extends BaseService
         return $this->em->transactional(function () use ($attributes) {
             $order = $this->getDefaultOrder();
 
-            $product = $this->productService->findOneBy([
+            $product = $this->productService->getProduct([
                 'id' => $attributes['product_id']
             ]);
 
@@ -66,9 +84,7 @@ class OrderService extends BaseService
                     return OrderStoreStatus::PRODUCT_STOCK;
                 }
 
-                $productTotal = $product->getPrice() * $attributes['quantity']; // ürünün toplam fıyatı.
-
-                $orderProduct = $this->orderProductService->findOneBy( //aynı ürün daha önce eklenmiş mi ?
+                $orderProduct = $this->orderProductService->getOrderProduct( //aynı ürün daha önce eklenmiş mi ?
                     [
                         'order' => $order->getId(),
                         'product' => $product->getId()
@@ -76,12 +92,14 @@ class OrderService extends BaseService
                 );
 
                 if ($orderProduct) { //aynı ürün daha önce eklenmişse güncelleme yapılır.
+                    $productTotal = $this->updateOrderTotalByOrderProduct($order, $orderProduct, $product, $attributes['quantity']);
                     $this->orderProductService->update($orderProduct, [
                         'quantity' => $attributes['quantity'],
                         'unitPrice' => $product->getPrice(),
                         'total' => $productTotal
                     ]);
                 } else { //aynı ürün daha önce siparişe eklenmediyse ürünü siparişe ekleme yapılır
+                    $productTotal = $product->getPrice() * $attributes['quantity']; // ürünün toplam fiyatı.
                     $this->orderProductService->store([
                         'order' => $order,
                         'product' => $product,
@@ -89,15 +107,30 @@ class OrderService extends BaseService
                         'unitPrice' => $product->getPrice(),
                         'total' => $productTotal
                     ]);
+                    $order->setTotal($order->getTotal() + $productTotal); //Order Total bilgisinin güncellenmesi
                 }
 
-                //TODO: quantity degistiginde total guncellenecek
-                $order->setTotal($order->getTotal() + $productTotal); //Order Total bilgisinin güncellenmesi
-                $this->update($order, true); //ürün toplam fiyatının güncellenmesi.
+                $this->update($order); //ürün toplam fiyatının güncellenmesi.
                 return OrderStoreStatus::SUCCESS;
             }
             return OrderStoreStatus::ERROR;
         });
+    }
+
+    /**
+     * OrderProduct da göre order total bilgisini atar ve ürün fiyatını döner.
+     * @param Order $order
+     * @param OrderProduct $orderProduct
+     * @param Product $product
+     * @param int $quantity
+     * @return float
+     */
+    public function updateOrderTotalByOrderProduct(Order &$order, OrderProduct &$orderProduct, Product &$product, int &$quantity): float
+    {
+        $productTotal = $product->getPrice() * $quantity;
+        $order->setTotal($order->getTotal() - $orderProduct->getTotal()); //mevcut OrderProduct ın totalinin Order total den düşümü
+        $order->setTotal($order->getTotal() + $productTotal); //güncel order totalin atanması.
+        return $productTotal;
     }
 
     /**
@@ -110,15 +143,16 @@ class OrderService extends BaseService
         return $this->em->transactional(function () use ($productId) {
             $order = $this->getDefaultOrder();
 
-            $orderProduct = $this->orderProductService->findOneBy([
+            $orderProduct = $this->orderProductService->getOrderProduct([
                 'order' => $order->getId(),
                 'product' => $productId
             ]);
 
             if ($orderProduct) {
-                $order->setTotal($order->getTotal() - $orderProduct->getTotal());
-                $this->update($order, true);
-                $this->orderProductService->remove($orderProduct, true);
+                $this->update($order, [
+                    'total' => $order->getTotal() - $orderProduct->getTotal()
+                ]);
+                $this->orderProductService->remove($orderProduct);
                 return true;
             }
             return false;
@@ -142,11 +176,11 @@ class OrderService extends BaseService
         return $this->em->transactional(function () {
             $firstOrder = $this->repository->getDefaultOrder();
             if (is_null($firstOrder)) {
-                $customer = $this->customerService->findOneBy(['id' => getCustomerId()]);
+                $customer = $this->customerService->getCustomer(['id' => getCustomerId()]);
                 $this->store([
                     'total' => 0,
                     'customer' => $customer
-                ], true);
+                ]);
                 return $this->getDefaultOrder();
             }
             return $firstOrder;
