@@ -2,66 +2,91 @@
 
 namespace App\Service;
 
+use App\Entity\Discount;
 use App\Entity\Order;
 use App\Enum\DiscountStatus;
 use App\Enum\DiscountType;
 use App\Helper\CalculationHelper;
 use App\Repository\DiscountRepository;
+use App\Strategy\Discount\DiscountFreePieceByCategoryAndSoldPieceStrategy;
+use App\Strategy\Discount\DiscountManagerStrategy;
+use App\Strategy\Discount\DiscountPercentByCategoryAndSoldCheapestStrategy;
+use App\Strategy\Discount\DiscountPercentOverPriceStrategy;
 use Doctrine\Common\Collections\Collection;
 
 class DiscountService extends BaseService
 {
-    private OrderService $orderService;
-    private ?Order $order;
-    private Collection $orderProducts;
-    private array $discountMessages = [];
-    private float $orderTotal = 0; //Siparis toplami
-    private float $totalDiscount = 0; //Siparişten düşülen indirim toplamı
-    private float $discountedTotal = 0; //Siparişten indirimi düştükten sonraki kalan sipariş toplamı
-    private array $discountTypes = [];
-
-    public function __construct(DiscountRepository $repository, OrderService $orderService)
+    public function __construct(DiscountRepository $repository)
     {
-        //TODO: Design Pattern ile guncellencek
         $this->repository = $repository;
-        $this->orderService = $orderService;
-        $this->order = $this->orderService->getDefaultOrder(); //Sipariş bilgisi
-        $this->orderProducts = $this->order->getOrderProducts(); //Siparişe ait ürün Listesi
+    }
 
-        //*Toplam sipariş fiyatından indirimi düştükten sonrası kalan fiyat bilgisi
-        //*Güncel toplam sipariş totalinin belirlenmesi
-        $this->getOrderTotal();
+    /**
+     * @param array $criteria
+     * @param array|null $orderBy
+     * @return Discount|null
+     */
+    public function getDiscount(array $criteria, array $orderBy = null): ?Discount
+    {
+        return $this->repository->findOneBy($criteria, $orderBy);
+    }
 
-        //Hangi indirim yöntemi ile düşüş yapıldığının bilgisini almak için
-        $this->discountTypes = DiscountType::getFlipConstants();
+    /**
+     * @param array $criteria
+     * @param array|null $orderBy
+     * @param $limit
+     * @param $offset
+     * @return Discount[]
+     */
+    public function getDiscountBy(array $criteria, array $orderBy = null, $limit = null, $offset = null): array
+    {
+        return $this->repository->findBy($criteria, $orderBy, $limit, $offset);
     }
 
     /**
      * İndirim algoritmalarına göre sonuçları döndürür.
+     * @param OrderService $orderService
      * @return array
      */
-    public function getResult(): array
+    public function getResult(OrderService &$orderService): array
     {
-        $this->percentOverPrice(); //Toplam sipariş fiyatlarına göre indirimler yapılır.
-        $this->freePieceByCategoryAndSoldPiece(); //Belirli Kategorideki ve belirli satış adetine göre ücretsiz verilecek adet düşülür
-        $this->percentByCategoryAndSoldCheapest(); //Kategori ve satış adetine göre en ucuz üründen belirlen yüzde kadar indirim yapılır.
-
-        return [
-            'order_id' => $this->order->getId(),
-            'discount' => $this->discountMessages,
-            "totalDiscount" => $this->totalDiscount,
-            "discountedTotal" => $this->discountedTotal,
-            "total" => $this->orderTotal
+        $order = $orderService->getDefaultOrder();
+        $data = (object)[
+            'order' => $order, //Sipariş bilgisi
+            'orderService' => &$orderService,
+            'discountService' => &$this,
+            'orderProducts' => $order->getOrderProducts(),  //Siparişe ait ürün Listesi
+            'discountMessages' => [],
+            'orderTotal' => $order->getTotal(), //Siparis toplami
+            'discountedTotal' => $order->getTotal(), //Siparişten indirim düştükten sonra kalan fiyat
+            'totalDiscount' => 0, //Siparişten düşülen indirim toplamı
+            'discountTypes' => DiscountType::getFlipConstants(), //Hangi indirim yöntemi ile düşüş yapıldığının bilgisini almak için
         ];
-    }
 
-    private function getOrderTotal()
-    {
-        $this->discountedTotal = 0;
-        foreach ($this->orderProducts as $orderProduct) {
-            $this->discountedTotal += $orderProduct->getTotal();
-            $this->orderTotal += $orderProduct->getTotal();
+        $strategies = [
+            new DiscountPercentOverPriceStrategy(),
+            new DiscountFreePieceByCategoryAndSoldPieceStrategy(),
+            new DiscountPercentByCategoryAndSoldCheapestStrategy()
+        ];
+
+        $discountManagerStrategy = new DiscountManagerStrategy();
+        foreach ($strategies as $strategy){
+            $discountManagerStrategy->setStrategy($strategy);
+            $discountManagerStrategy->algorithm($data);
         }
+
+        //$this->percentOverPrice(); //Toplam sipariş fiyatlarına göre indirimler yapılır.
+        //$this->freePieceByCategoryAndSoldPiece(); //Belirli Kategorideki ve belirli satış adetine göre ücretsiz verilecek adet düşülür
+        //$this->percentByCategoryAndSoldCheapest(); //Kategori ve satış adetine göre en ucuz üründen belirlen yüzde kadar indirim yapılır.
+//        [
+//            'order_id' => $this->order->getId(),
+//            'discount' => $this->discountMessages,
+//            "totalDiscount" => $this->totalDiscount,
+//            "discountedTotal" => $this->discountedTotal,
+//            "total" => $this->orderTotal
+//        ];
+
+        return $discountManagerStrategy->getResult();
     }
 
     /**
@@ -70,7 +95,7 @@ class DiscountService extends BaseService
      */
     private function percentOverPrice()
     {
-        $discountDetails = $this->discountRepository->findBy([
+        $discountDetails = $this->getDiscountBy([
             'type' => DiscountType::PERCENT_OVER_PRICE,
             'status' => DiscountStatus::ACTIVE
         ]);
@@ -96,7 +121,7 @@ class DiscountService extends BaseService
      */
     private function freePieceByCategoryAndSoldPiece()
     {
-        $discountDetails = $this->discountRepository->findBy([
+        $discountDetails = $this->getDiscountBy([
             'type' => DiscountType::FREE_PIECE_BY_CATEGORY_AND_SOLD_PIECE,
             'status' => DiscountStatus::ACTIVE
         ]);
@@ -129,7 +154,7 @@ class DiscountService extends BaseService
      */
     public function percentByCategoryAndSoldCheapest()
     {
-        $discountDetails = $this->discountRepository->findBy([
+        $discountDetails = $this->getDiscountBy([
             'type' => DiscountType::PERCENT_CATEGORY_SOLD_CHEAPEST,
             'status' => DiscountStatus::ACTIVE
         ]);
@@ -142,10 +167,9 @@ class DiscountService extends BaseService
                 if ($orderProduct->getProduct()->getCategory()->getId() == $jsonData['categoryId'] &&
                     $orderProduct->getQuantity() >= $jsonData['minBuyPiece']) {
 
-                    dump($orderProduct->getUnitPrice());
-                    if ($minBuyPrice == 0) { //default min product price
+                    if ($minBuyPrice == 0) { //Default en dusuk fiyatin belirlenmesi
                         $minBuyPrice = $orderProduct->getUnitPrice();
-                    } else if ($minBuyPrice > $orderProduct->getUnitPrice()) { //detect min price
+                    } else if ($minBuyPrice > $orderProduct->getUnitPrice()) { //En dusuk fiyatin bulunmasi
                         $minBuyPrice = $orderProduct->getUnitPrice();
                     }
                 }
