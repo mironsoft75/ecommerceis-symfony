@@ -58,6 +58,10 @@ https://documenter.getpostman.com/view/22844490/VUqmvJvC
 |   |   `-- CalculationHelper.php
 |   |   `-- GeneralHelper.php
 |   |   `-- ...
+|   |-- Interfaces
+|   |   |-- Discount
+|   |   |   `-- DiscountStrategyInterface.php
+|   |   |   `-- ...
 |   |-- Repository
 |   |   `-- BaseRepository.php
 |   |   `-- OrderRepository.php
@@ -66,6 +70,10 @@ https://documenter.getpostman.com/view/22844490/VUqmvJvC
 |   |   `-- BaseService.php
 |   |   `-- OrderService.php
 |   |   `-- ...
+|   |-- Strategy
+|   |   |-- Discount
+|   |   |   `-- DiscountManagerStrategy.php
+|   |   |   `-- ...
 |   |-- docker
 |   |   |-- images
 |   |   |   |-- nginx
