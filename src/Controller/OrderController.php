@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Enum\OrderStoreStatus;
+use App\FormRequest\OrderProductStoreRequest;
 use App\Helper\GeneralHelper;
 use App\Helper\RedirectHelper;
 use App\Service\OrderService;
@@ -12,7 +13,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Component\Validator\Constraints as Assert;
 
 class OrderController extends AbstractController
 {
@@ -41,25 +41,9 @@ class OrderController extends AbstractController
      * @param Request $request
      * @return JsonResponse
      */
-    public function storeProduct(Request $request): JsonResponse
+    public function storeProduct(OrderProductStoreRequest $request): JsonResponse
     {
-        $attributes = GeneralHelper::getJson($request);
-        $errors = $this->validator->validate($attributes, new Assert\Collection([
-            'product_id' => [
-                new Assert\NotBlank(),
-                new Assert\Type('integer'),
-            ],
-            'quantity' => [
-                new Assert\NotBlank(),
-                new Assert\Type('integer'),
-            ]
-        ]));
-
-        if (count($errors) > 0) {
-            return RedirectHelper::badRequest(GeneralHelper::getErrorMessages($errors));
-        }
-
-        $status = $this->orderService->storeProduct($attributes);
+        $status = $this->orderService->storeProduct($request->all());
         switch ($status) {
             case OrderStoreStatus::SUCCESS:
                 return RedirectHelper::store();
