@@ -165,7 +165,7 @@ class OrderService extends BaseService
      */
     public function discount(): array
     {
-        return $this->discountService->getResult($this);
+        return $this->discountService->getDiscountAnalysis($this);
     }
 
     /**

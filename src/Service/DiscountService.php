@@ -44,7 +44,7 @@ class DiscountService extends BaseService
      * @param OrderService $orderService
      * @return array
      */
-    public function getResult(OrderService &$orderService): array
+    public function getDiscountAnalysis(OrderService &$orderService): array
     {
         $order = $orderService->getDefaultOrder();
         $data = (object)[
