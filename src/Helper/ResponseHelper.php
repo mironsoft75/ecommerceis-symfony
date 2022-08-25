@@ -5,7 +5,7 @@ namespace App\Helper;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
-class RedirectHelper
+class ResponseHelper
 {
     /**
      * @param $attributes

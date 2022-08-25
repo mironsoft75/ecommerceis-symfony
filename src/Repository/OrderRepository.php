@@ -24,15 +24,12 @@ class OrderRepository extends BaseRepository
     }
 
     /**
-     * Müşteriye ait ilk order kaydını getirir yoksa null döner.
      * @return Order|null
-     * @throws NonUniqueResultException
      */
     public function getDefaultOrder(): ?Order
     {
-        return $this->createQueryBuilder('o')
-            ->where('o.customer = :customer_id')
-            ->setParameter('customer_id', getCustomerId())
-            ->getQuery()->getOneOrNullResult();
+        return $this->findOneBy([
+            'customer' => getCustomerId()
+        ]);
     }
 }

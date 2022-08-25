@@ -79,6 +79,14 @@ abstract class BaseRepository extends ServiceEntityRepository
     }
 
     /**
+     * @return EntityManagerInterface
+     */
+    public function getEntityManager(): EntityManagerInterface
+    {
+        return parent::getEntityManager();
+    }
+
+    /**
      * @throws Exception
      */
     public function commit()

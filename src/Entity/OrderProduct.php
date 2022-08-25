@@ -19,9 +19,9 @@ class OrderProduct
      * @ORM\Column(type="integer")
      * @Groups({"orderProduct"})
      */
-    private $id;
+    private int $id;
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
@@ -36,7 +36,7 @@ class OrderProduct
      *     message="The value {{ value }} is not a valid {{ type }}."
      * )
      */
-    private $order;
+    private Order $order;
 
     /**
      * @ORM\ManyToOne (targetEntity=Product::class, inversedBy="orderProducts")
@@ -48,7 +48,7 @@ class OrderProduct
      *     message="The value {{ value }} is not a valid {{ type }}."
      * )
      */
-    private $product;
+    private Product $product;
 
     /**
      * @ORM\Column(type="integer")
@@ -59,57 +59,66 @@ class OrderProduct
      *     message="The value {{ value }} is not a valid {{ type }}."
      * )
      */
-    private $quantity;
+    private int $quantity;
 
     /**
      * @ORM\Column(type="decimal", precision=13, scale=2, options={"default" : 0})
      * @Groups({"orderProduct"})
      */
-    private $unitPrice;
+    private string $unitPrice;
 
     /**
      * @ORM\Column(type="decimal", precision=13, scale=2, options={"default" : 0})
      * @Groups({"orderProduct"})
      */
-    private $total;
+    private string $total;
 
     /**
-     * @return mixed
+     * @return Order
      */
-    public function getOrder()
+    public function getOrder(): Order
     {
         return $this->order;
     }
 
     /**
-     * @param mixed $order
+     * @param Order $order
      */
-    public function setOrder($order): void
+    public function setOrder(Order $order): void
     {
         $this->order = $order;
     }
 
     /**
-     * @return mixed
+     * @return Product
      */
-    public function getProduct()
+    public function getProduct(): Product
     {
         return $this->product;
     }
 
     /**
-     * @param mixed $product
+     * @param Product $product
+     * @return $this
      */
-    public function setProduct($product): void
+    public function setProduct(Product $product): self
     {
         $this->product = $product;
+        return $this;
     }
 
-    public function getQuantity(): ?int
+    /**
+     * @return int
+     */
+    public function getQuantity(): int
     {
         return $this->quantity;
     }
 
+    /**
+     * @param int $quantity
+     * @return $this
+     */
     public function setQuantity(int $quantity): self
     {
         $this->quantity = $quantity;
@@ -117,11 +126,18 @@ class OrderProduct
         return $this;
     }
 
-    public function getUnitPrice(): ?string
+    /**
+     * @return string
+     */
+    public function getUnitPrice(): string
     {
         return $this->unitPrice;
     }
 
+    /**
+     * @param string $unitPrice
+     * @return $this
+     */
     public function setUnitPrice(string $unitPrice): self
     {
         $this->unitPrice = $unitPrice;
@@ -129,11 +145,18 @@ class OrderProduct
         return $this;
     }
 
-    public function getTotal(): ?string
+    /**
+     * @return string
+     */
+    public function getTotal(): string
     {
         return $this->total;
     }
 
+    /**
+     * @param string $total
+     * @return $this
+     */
     public function setTotal(string $total): self
     {
         $this->total = $total;

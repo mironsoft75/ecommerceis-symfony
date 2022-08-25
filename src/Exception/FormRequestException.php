@@ -3,6 +3,7 @@
 namespace App\Exception;
 
 use App\Helper\GeneralHelper;
+use App\Helper\ValidationHelper;
 use Exception;
 use Throwable;
 
@@ -29,7 +30,7 @@ class FormRequestException extends Exception
      */
     public function getErrorMessages(): array
     {
-        return GeneralHelper::getErrorMessages($this->errors);
+        return ValidationHelper::getErrorMessages($this->errors);
     }
 
 }

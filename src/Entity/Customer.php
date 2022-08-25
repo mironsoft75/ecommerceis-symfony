@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\CustomerRepository;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -20,47 +21,57 @@ class Customer
      * @ORM\Column(type="integer")
      * @Groups({"customer"})
      */
-    private $id;
+    private int $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"customer"})
      */
-    private $name;
+    private string $name;
 
     /**
      * @ORM\Column(type="date")
      * @Groups({"customer"})
      */
-    private $since;
+    private DateTimeInterface $since;
 
     /**
      * @ORM\Column(type="decimal", precision=13, scale=2, options={"default" : 0})
      * @Groups({"customer"})
      */
-    private $revenue;
+    private string $revenue;
 
     /**
-     * @ORM\OneToMany(targetEntity=Order::class, mappedBy="customer", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=Order::class, mappedBy="customer")
      * @Groups({"customerOrderRelation"})
      */
-    private $orders;
+    private ArrayCollection $orders;
 
     public function __construct()
     {
         $this->orders = new ArrayCollection();
     }
 
-    public function getId(): ?int
+    /**
+     * @return int
+     */
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function getName(): ?string
+    /**
+     * @return string
+     */
+    public function getName(): string
     {
         return $this->name;
     }
 
+    /**
+     * @param string $name
+     * @return $this
+     */
     public function setName(string $name): self
     {
         $this->name = $name;
@@ -68,23 +79,37 @@ class Customer
         return $this;
     }
 
-    public function getSince(): ?\DateTimeInterface
+    /**
+     * @return DateTimeInterface
+     */
+    public function getSince(): DateTimeInterface
     {
         return $this->since;
     }
 
-    public function setSince(\DateTimeInterface $since): self
+    /**
+     * @param DateTimeInterface $since
+     * @return $this
+     */
+    public function setSince(DateTimeInterface $since): self
     {
         $this->since = $since;
 
         return $this;
     }
 
-    public function getRevenue(): ?string
+    /**
+     * @return string
+     */
+    public function getRevenue(): string
     {
         return $this->revenue;
     }
 
+    /**
+     * @param string $revenue
+     * @return $this
+     */
     public function setRevenue(string $revenue): self
     {
         $this->revenue = $revenue;
@@ -99,27 +124,4 @@ class Customer
     {
         return $this->orders;
     }
-
-    public function addOrder(Order $order): self
-    {
-        if (!$this->orders->contains($order)) {
-            $this->orders[] = $order;
-            $order->setCustomer($this);
-        }
-
-        return $this;
-    }
-
-    public function removeOrder(Order $order): self
-    {
-        if ($this->orders->removeElement($order)) {
-            // set the owning side to null (unless already changed)
-            if ($order->getCustomer() === $this) {
-                $order->setCustomer(null);
-            }
-        }
-
-        return $this;
-    }
-
 }

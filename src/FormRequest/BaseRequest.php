@@ -3,8 +3,7 @@
 namespace App\FormRequest;
 
 use App\Exception\FormRequestException;
-use App\Helper\GeneralHelper;
-use Symfony\Component\HttpFoundation\Request;
+use App\Helper\RequestHelper;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -22,7 +21,7 @@ class BaseRequest
     {
         $this->validator = $validator;
 
-        $this->attributes = GeneralHelper::getStackJson($request);
+        $this->attributes = RequestHelper::getStackJson($request);
         $this->validate();
         $this->hasError();
     }

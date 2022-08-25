@@ -20,42 +20,53 @@ class Order
      * @ORM\Column(type="integer")
      * @Groups({"order"})
      */
-    private $id;
+    private int $id;
 
     /**
      * @ORM\Column(type="decimal", precision=13, scale=2, options={"default" : 0})
      * @Groups({"order"})
      */
-    private $total;
+    private string $total;
 
     /**
      * @ORM\ManyToOne(targetEntity=Customer::class, inversedBy="orders")
      * @ORM\JoinColumn(nullable=false)
      * @Groups({"order"})
      */
-    private $customer;
+    private Customer $customer;
 
     /**
      * @ORM\OneToMany(targetEntity=OrderProduct::class, mappedBy="order")
      * @Groups({"orderOrderProductRelation"})
      */
-    private $orderProducts;
+    private ArrayCollection $orderProducts;
+
 
     public function __construct()
     {
         $this->orderProducts = new ArrayCollection();
     }
 
-    public function getId(): ?int
+    /**
+     * @return int
+     */
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function getTotal(): ?string
+    /**
+     * @return string
+     */
+    public function getTotal(): string
     {
         return $this->total;
     }
 
+    /**
+     * @param string $total
+     * @return $this
+     */
     public function setTotal(string $total): self
     {
         $this->total = $total;
@@ -63,12 +74,19 @@ class Order
         return $this;
     }
 
-    public function getCustomer(): ?Customer
+    /**
+     * @return Customer
+     */
+    public function getCustomer(): Customer
     {
         return $this->customer;
     }
 
-    public function setCustomer(?Customer $customer): self
+    /**
+     * @param Customer $customer
+     * @return $this
+     */
+    public function setCustomer(Customer $customer): self
     {
         $this->customer = $customer;
 

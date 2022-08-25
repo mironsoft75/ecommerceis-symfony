@@ -20,35 +20,45 @@ class Category
      * @ORM\Column(type="integer")
      * @Groups({"category"})
      */
-    private $id;
+    private int $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"category"})
      */
-    private $name;
+    private string $name;
 
     /**
      * @ORM\OneToMany(targetEntity=Product::class, mappedBy="category")
      * @Groups({"categoryProductRelation"})
      */
-    private $products;
+    private ArrayCollection $products;
 
     public function __construct()
     {
         $this->products = new ArrayCollection();
     }
 
-    public function getId(): ?int
+    /**
+     * @return int
+     */
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function getName(): ?string
+    /**
+     * @return string
+     */
+    public function getName(): string
     {
         return $this->name;
     }
 
+    /**
+     * @param string $name
+     * @return $this
+     */
     public function setName(string $name): self
     {
         $this->name = $name;
@@ -64,6 +74,10 @@ class Category
         return $this->products;
     }
 
+    /**
+     * @param Product $product
+     * @return $this
+     */
     public function addProduct(Product $product): self
     {
         if (!$this->products->contains($product)) {
@@ -74,6 +88,10 @@ class Category
         return $this;
     }
 
+    /**
+     * @param Product $product
+     * @return $this
+     */
     public function removeProduct(Product $product): self
     {
         if ($this->products->removeElement($product)) {

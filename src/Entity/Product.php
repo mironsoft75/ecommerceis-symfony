@@ -20,67 +20,83 @@ class Product
      * @ORM\Column(type="integer")
      * @Groups({"product"})
      */
-    private $id;
+    private int $id;
 
     /**
      * @ORM\ManyToOne(targetEntity=Category::class, inversedBy="products")
      * @ORM\JoinColumn(nullable=false)
      * @Groups({"productCategoryRelation"})
      */
-    private $category;
+    private Category $category;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"product"})
      */
-    private $name;
+    private string $name;
 
     /**
      * @ORM\Column(type="decimal", precision=13, scale=2, options={"default" : 0})
      * @Groups({"product"})
      */
-    private $price;
+    private string $price;
 
     /**
      * @ORM\Column(type="integer", options={"default" : 0})
      * @Groups({"product"})
      */
-    private $stock;
+    private int $stock;
 
     /**
      * @ORM\OneToMany(targetEntity=OrderProduct::class, mappedBy="product")
      * @Groups({"productOrderProductRelation"})
      */
-    private $orderProducts;
+    private ArrayCollection $orderProducts;
 
     public function __construct()
     {
-        $this->customer = new ArrayCollection();
         $this->orderProducts = new ArrayCollection();
     }
 
-    public function getId(): ?int
+    /**
+     * @return int
+     */
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function getCategory(): ?Category
+    /**
+     * @return Category
+     */
+    public function getCategory(): Category
     {
         return $this->category;
     }
 
-    public function setCategory(?Category $category): self
+    /**
+     * @param Category $category
+     * @return $this
+     */
+    public function setCategory(Category $category): self
     {
         $this->category = $category;
 
         return $this;
     }
 
-    public function getName(): ?string
+    /**
+     * @return string
+     */
+    public function getName(): string
     {
         return $this->name;
     }
 
+    /**
+     * @param string $name
+     * @return $this
+     */
     public function setName(string $name): self
     {
         $this->name = $name;
@@ -88,11 +104,18 @@ class Product
         return $this;
     }
 
-    public function getPrice(): ?string
+    /**
+     * @return string
+     */
+    public function getPrice(): string
     {
         return $this->price;
     }
 
+    /**
+     * @param string $price
+     * @return $this
+     */
     public function setPrice(string $price): self
     {
         $this->price = $price;
@@ -100,11 +123,18 @@ class Product
         return $this;
     }
 
-    public function getStock(): ?int
+    /**
+     * @return int
+     */
+    public function getStock(): int
     {
         return $this->stock;
     }
 
+    /**
+     * @param int $stock
+     * @return $this
+     */
     public function setStock(int $stock): self
     {
         $this->stock = $stock;

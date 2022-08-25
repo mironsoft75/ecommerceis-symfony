@@ -16,39 +16,39 @@ class Discount
      * @ORM\GeneratedValue(strategy="IDENTITY")
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private int $id;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $type;
+    private int $type;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $name;
+    private string $name;
 
     /**
      * @ORM\Column(type="string", length=2500, nullable=true)
      */
-    private $description;
+    private ?string $description;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $status;
+    private bool $status;
 
     /**
      * @ORM\Column(type="text")
      */
-    private $jsonData;
+    private string $jsonData;
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function getType(): ?int
+    public function getType(): int
     {
         return $this->type;
     }
@@ -60,11 +60,18 @@ class Discount
         return $this;
     }
 
-    public function getName(): ?string
+    /**
+     * @return string
+     */
+    public function getName(): string
     {
         return $this->name;
     }
 
+    /**
+     * @param string $name
+     * @return $this
+     */
     public function setName(string $name): self
     {
         $this->name = $name;
@@ -72,11 +79,18 @@ class Discount
         return $this;
     }
 
-    public function getDescription(): ?string
+    /**
+     * @return string
+     */
+    public function getDescription(): string
     {
         return $this->description;
     }
 
+    /**
+     * @param string|null $description
+     * @return $this
+     */
     public function setDescription(?string $description): self
     {
         $this->description = $description;
@@ -84,11 +98,18 @@ class Discount
         return $this;
     }
 
-    public function isStatus(): ?bool
+    /**
+     * @return bool
+     */
+    public function isStatus(): bool
     {
         return $this->status;
     }
 
+    /**
+     * @param bool $status
+     * @return $this
+     */
     public function setStatus(bool $status): self
     {
         $this->status = $status;
@@ -96,11 +117,18 @@ class Discount
         return $this;
     }
 
+    /**
+     * @return array
+     */
     public function getJsonData(): array
     {
         return json_decode($this->jsonData, true);
     }
 
+    /**
+     * @param string $jsonData
+     * @return $this
+     */
     public function setJsonData(string $jsonData): self
     {
         $this->jsonData = $jsonData;

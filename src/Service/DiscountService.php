@@ -4,11 +4,13 @@ namespace App\Service;
 
 use App\Entity\Discount;
 use App\Enum\DiscountType;
+use App\Helper\ArrayHelper;
 use App\Repository\DiscountRepository;
 use App\Strategy\Discount\DiscountFreePieceByCategoryAndSoldPieceStrategy;
 use App\Strategy\Discount\DiscountManagerStrategy;
 use App\Strategy\Discount\DiscountPercentByCategoryAndSoldCheapestStrategy;
 use App\Strategy\Discount\DiscountPercentOverPriceStrategy;
+use Exception;
 
 class DiscountService extends BaseService
 {
@@ -20,11 +22,12 @@ class DiscountService extends BaseService
     /**
      * @param array $criteria
      * @param array|null $orderBy
-     * @return Discount|null
+     * @return Discount
+     * @throws Exception
      */
-    public function getDiscount(array $criteria, array $orderBy = null): ?Discount
+    public function getDiscount(array $criteria, array $orderBy = null): Discount
     {
-        return $this->repository->findOneBy($criteria, $orderBy);
+        return $this->findOneBy($criteria, $orderBy);
     }
 
     /**
@@ -43,6 +46,7 @@ class DiscountService extends BaseService
      * İndirim algoritmalarına göre sonuçları döndürür.
      * @param OrderService $orderService
      * @return array
+     * @throws \ReflectionException
      */
     public function getDiscountAnalysis(OrderService &$orderService): array
     {
@@ -56,7 +60,7 @@ class DiscountService extends BaseService
             'orderTotal' => $order->getTotal(), //Siparis toplami
             'discountedTotal' => $order->getTotal(), //Siparişten indirim düştükten sonra kalan fiyat
             'totalDiscount' => 0, //Siparişten düşülen indirim toplamı
-            'discountTypes' => DiscountType::getFlipConstants(), //Hangi indirim yöntemi ile düşüş yapıldığının bilgisini almak için
+            'discountTypes' => ArrayHelper::getReflactionClassWithFlip(DiscountType::class), //Hangi indirim yöntemi ile düşüş yapıldığının bilgisini almak için
         ];
 
         $strategies = [

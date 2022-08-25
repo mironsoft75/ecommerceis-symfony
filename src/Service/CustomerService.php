@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\Customer;
 use App\Repository\CustomerRepository;
+use Exception;
 
 class CustomerService extends BaseService
 {
@@ -15,11 +16,12 @@ class CustomerService extends BaseService
     /**
      * @param array $criteria
      * @param array|null $orderBy
-     * @return Customer|null
+     * @return Customer
+     * @throws Exception
      */
-    public function getCustomer(array $criteria, array $orderBy = null): ?Customer
+    public function getCustomer(array $criteria, array $orderBy = null): Customer
     {
-        return $this->repository->findOneBy($criteria, $orderBy);
+        return $this->findOneBy($criteria, $orderBy);
     }
 
     /**
@@ -32,5 +34,14 @@ class CustomerService extends BaseService
     public function getCustomerBy(array $criteria, array $orderBy = null, $limit = null, $offset = null): array
     {
         return $this->repository->findBy($criteria, $orderBy, $limit, $offset);
+    }
+
+    /**
+     * @return Customer
+     * @throws Exception
+     */
+    public function getCustomerTest(): Customer
+    {
+        return $this->getCustomer(['id' => getCustomerId()]);
     }
 }
