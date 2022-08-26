@@ -8,7 +8,12 @@ use App\Interfaces\Strategy\Discount\DiscountStrategyInterface;
 
 class DiscountFreePieceByCategoryAndSoldPieceStrategy implements DiscountStrategyInterface
 {
-    public function runAlgorithm(DiscountManagerStrategy &$dms)
+    /**
+     * Belirlenen kategori bilgisine ve satın aldığı adete göre düşülecek olan adet fiyat bilgisini indirime ekler.
+     * @param DiscountManagerStrategy $dms
+     * @return void
+     */
+    public function runAlgorithm(DiscountManagerStrategy &$dms): void
     {
         $discountDetails = $dms->discountService->getDiscountBy([
             'type' => DiscountType::FREE_PIECE_BY_CATEGORY_AND_SOLD_PIECE,
@@ -23,14 +28,8 @@ class DiscountFreePieceByCategoryAndSoldPieceStrategy implements DiscountStrateg
                     && $orderProduct->getQuantity() == $jsonData['buyPiece']) {
 
                     $discountAmount = round($orderProduct->getUnitPrice() * $jsonData['freePiece'], 2);
-                    $dms->discountedTotal = round($dms->discountedTotal - $discountAmount, 2);
-                    $dms->totalDiscount = round($dms->totalDiscount + $discountAmount, 2);
-
-                    $dms->discountMessages[] = [
-                        "discountReason" => $dms->discountTypes[DiscountType::FREE_PIECE_BY_CATEGORY_AND_SOLD_PIECE],
-                        "discountAmount" => $discountAmount,
-                        "subtotal" => $dms->discountedTotal
-                    ];
+                    $dms->calculateDiscountedTotalAndTotalDiscountByDiscountAmount($discountAmount);
+                    $dms->addDiscountMessage($dms->discountTypes[DiscountType::FREE_PIECE_BY_CATEGORY_AND_SOLD_PIECE], $discountAmount);
                     break;
                 }
             }

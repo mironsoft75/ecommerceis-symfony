@@ -6,6 +6,7 @@ use App\Entity\Order;
 use App\Entity\OrderProduct;
 use App\Repository\OrderRepository;
 use Exception;
+use ReflectionException;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class OrderService extends BaseService
@@ -67,12 +68,11 @@ class OrderService extends BaseService
     /**
      * Siparişteki ürünlere göre indirimleri hesaplar
      * @return array
+     * @throws ReflectionException
      */
     public function discount(): array
     {
-        return $this->em->transactional(function (){
-            return $this->discountService->getDiscountAnalysis($this);
-        });
+        return $this->discountService->getDiscountAnalysis($this);
     }
 
     /**

@@ -9,7 +9,12 @@ use App\Interfaces\Strategy\Discount\DiscountStrategyInterface;
 
 class DiscountPercentOverPriceStrategy implements DiscountStrategyInterface
 {
-    public function runAlgorithm(DiscountManagerStrategy &$dms)
+    /**
+     * Belirlenen sipariş toplam tutar sayısına göre X% indirim eklenmesi.
+     * @param DiscountManagerStrategy $dms
+     * @return void
+     */
+    public function runAlgorithm(DiscountManagerStrategy &$dms): void
     {
         $discountDetails = $dms->discountService->getDiscountBy([
             'type' => DiscountType::PERCENT_OVER_PRICE,
@@ -20,13 +25,8 @@ class DiscountPercentOverPriceStrategy implements DiscountStrategyInterface
             $jsonData = $discountDetail->getJsonData();
             if ($dms->orderTotal >= $jsonData['overPrice']) {
                 $discountAmount = CalculationHelper::calculatePercent($dms->orderTotal, $jsonData['percent']); //Totalden yüzde alımı
-                $dms->discountedTotal = round($dms->discountedTotal - $discountAmount, 2); //Toplam fiyattan düşüş
-                $dms->totalDiscount = round($dms->totalDiscount + $discountAmount, 2); //İndirim toplamı arttırma
-                $dms->discountMessages[] = [
-                    "discountReason" => $dms->discountTypes[DiscountType::PERCENT_OVER_PRICE],
-                    "discountAmount" => $discountAmount,
-                    "subtotal" => $dms->discountedTotal
-                ];
+                $dms->calculateDiscountedTotalAndTotalDiscountByDiscountAmount($discountAmount);
+                $dms->addDiscountMessage($dms->discountTypes[DiscountType::PERCENT_OVER_PRICE], $discountAmount);
             }
         }
     }

@@ -9,7 +9,12 @@ use App\Interfaces\Strategy\Discount\DiscountStrategyInterface;
 
 class DiscountPercentByCategoryAndSoldCheapestStrategy implements DiscountStrategyInterface
 {
-    public function runAlgorithm(DiscountManagerStrategy &$dms)
+    /**
+     * Belirli kategori ve satış adetine göre en ucuz üründen belirlenen yüzde kadar indirim yapılır.
+     * @param DiscountManagerStrategy $dms
+     * @return void
+     */
+    public function runAlgorithm(DiscountManagerStrategy &$dms): void
     {
         $discountDetails = $dms->discountService->getDiscountBy([
             'type' => DiscountType::PERCENT_CATEGORY_SOLD_CHEAPEST,
@@ -34,14 +39,8 @@ class DiscountPercentByCategoryAndSoldCheapestStrategy implements DiscountStrate
 
             if ($minBuyPrice != 0) {
                 $discountAmount = round(CalculationHelper::calculatePercent($minBuyPrice, $jsonData['percent']), 2);
-                $dms->discountedTotal = round($dms->discountedTotal - $discountAmount, 2);
-                $dms->totalDiscount = round($dms->totalDiscount + $discountAmount, 2);
-
-                $dms->discountMessages[] = [
-                    "discountReason" => $dms->discountTypes[DiscountType::PERCENT_CATEGORY_SOLD_CHEAPEST],
-                    "discountAmount" => $discountAmount,
-                    "subtotal" => $dms->discountedTotal
-                ];
+                $dms->calculateDiscountedTotalAndTotalDiscountByDiscountAmount($discountAmount);
+                $dms->addDiscountMessage($dms->discountTypes[DiscountType::PERCENT_CATEGORY_SOLD_CHEAPEST], $discountAmount);
             }
         }
     }

@@ -73,4 +73,28 @@ class DiscountManagerStrategy
             "total" => $this->orderTotal
         ];
     }
+
+    /**
+     * @param string $discountReason
+     * @param float $discountAmount
+     * @return void
+     */
+    public function addDiscountMessage(string $discountReason, float $discountAmount)
+    {
+        $this->discountMessages[] = [
+            "discountReason" => $discountReason,
+            "discountAmount" => $discountAmount,
+            "subtotal" => $this->discountedTotal
+        ];
+    }
+
+    /**
+     * @param float $discountAmount
+     * @return void
+     */
+    public function calculateDiscountedTotalAndTotalDiscountByDiscountAmount(float $discountAmount)
+    {
+        $this->discountedTotal = round($this->discountedTotal - $discountAmount, 2); //Toplam fiyattan düşüş
+        $this->totalDiscount = round($this->totalDiscount + $discountAmount, 2); //İndirim toplamı arttırma
+    }
 }
