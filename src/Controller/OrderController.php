@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Helper\ResponseHelper;
 use App\Service\OrderService;
-use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -23,6 +22,7 @@ class OrderController extends AbstractController
     }
 
     /**
+     * Müşterinin siparişindeki tüm ürün bilgilerini döner.
      * @Route ("", name="orders", methods={"GET"})
      * @return JsonResponse
      * @throws Exception
@@ -33,6 +33,7 @@ class OrderController extends AbstractController
     }
 
     /**
+     * Siparişteki ürünlere göre indirimleri hesaplar
      * @Route ("/discount", name="order_discount", methods={"GET"})
      * @return JsonResponse
      */

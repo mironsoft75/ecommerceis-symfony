@@ -24,6 +24,7 @@ class OrderProductController extends AbstractController
     }
 
     /**
+     * Siparişe ürünü ekler
      * @Route ("", name="store_order_product", methods={"POST"})
      * @param OrderProductStoreRequest $request
      * @return JsonResponse
@@ -35,6 +36,7 @@ class OrderProductController extends AbstractController
     }
 
     /**
+     * Siparişteki ürünü günceller
      * @Route ("/{orderProductId}", name="update_order_product", methods={"PUT"})
      * @param int $orderProductId
      * @param OrderProductUpdateRequest $request
@@ -48,6 +50,7 @@ class OrderProductController extends AbstractController
     }
 
     /**
+     * Siparişten ürünü kaldırır.
      * @Route ("/{orderProductId}", name="destroy_order_product", methods={"DELETE"})
      * @param $orderProductId
      * @return JsonResponse
