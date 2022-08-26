@@ -4,22 +4,43 @@ namespace App\Strategy\Discount;
 
 use App\Entity\Order;
 use App\Enum\DiscountType;
+use App\Helper\ArrayHelper;
 use App\Interfaces\Strategy\Discount\DiscountStrategyInterface;
 use App\Service\DiscountService;
 use App\Service\OrderService;
 use Doctrine\Common\Collections\Collection;
+use Exception;
+use ReflectionException;
 
 class DiscountManagerStrategy
 {
-    private ?DiscountStrategyInterface $strategy;
-    private object $data;
+    private DiscountStrategyInterface $strategy;
+
+    public OrderService $orderService;
+    public DiscountService $discountService;
+    public Order $order;
+    public Collection $orderProducts;
+    public array $discountMessages = [];
+    public float $orderTotal; //Siparis toplami
+    public float $discountedTotal; //Siparişten indirim düştükten sonra kalan fiyat
+    public float $totalDiscount = 0; //Siparişten düşülen toplam indirim
+    public array $discountTypes; //Hangi indirim yöntemi ile düşüş yapıldığının bilgisini almak için
 
     /**
-     * @param DiscountStrategyInterface|null $strategy
+     * @param OrderService $orderService
+     * @param DiscountService $discountService
+     * @throws ReflectionException
+     * @throws Exception
      */
-    public function __construct(DiscountStrategyInterface $strategy = null)
+    public function __construct(OrderService $orderService, DiscountService $discountService)
     {
-        $this->strategy = $strategy;
+        $this->orderService = $orderService;
+        $this->discountService = $discountService;
+        $this->order = $orderService->getDefaultOrder();
+        $this->orderProducts = $this->order->getOrderProducts();
+        $this->orderTotal = $this->order->getTotal();
+        $this->discountedTotal = $this->order->getTotal();
+        $this->discountTypes = ArrayHelper::getReflactionClassWithFlip(DiscountType::class);
     }
 
     /**
@@ -34,23 +55,22 @@ class DiscountManagerStrategy
     /**
      * @return void
      */
-    public function algorithm(&$data)
+    public function runAlgorithm()
     {
-        $this->data = $data;
-        $this->strategy->algorithm($data);
+        $this->strategy->runAlgorithm($this);
     }
 
     /**
      * @return array
      */
-    public function getResult(): array
+    public function getAnalysisResult(): array
     {
         return [
-            'order_id' => $this->data->order->getId(),
-            'discount' => $this->data->discountMessages,
-            "totalDiscount" => $this->data->totalDiscount,
-            "discountedTotal" => $this->data->discountedTotal,
-            "total" => $this->data->orderTotal
+            'order_id' => $this->order->getId(),
+            'discount' => $this->discountMessages,
+            "totalDiscount" => $this->totalDiscount,
+            "discountedTotal" => $this->discountedTotal,
+            "total" => $this->orderTotal
         ];
     }
 }

@@ -3,14 +3,13 @@
 namespace App\Service;
 
 use App\Entity\Discount;
-use App\Enum\DiscountType;
-use App\Helper\ArrayHelper;
 use App\Repository\DiscountRepository;
 use App\Strategy\Discount\DiscountFreePieceByCategoryAndSoldPieceStrategy;
 use App\Strategy\Discount\DiscountManagerStrategy;
 use App\Strategy\Discount\DiscountPercentByCategoryAndSoldCheapestStrategy;
 use App\Strategy\Discount\DiscountPercentOverPriceStrategy;
 use Exception;
+use ReflectionException;
 
 class DiscountService extends BaseService
 {
@@ -43,38 +42,24 @@ class DiscountService extends BaseService
     }
 
     /**
-     * İndirim algoritmalarına göre sonuçları döndürür.
      * @param OrderService $orderService
      * @return array
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    public function getDiscountAnalysis(OrderService &$orderService): array
+    public function getDiscountAnalysis(OrderService $orderService): array
     {
-        $order = $orderService->getDefaultOrder();
-        $data = (object)[
-            'order' => $order, //Sipariş bilgisi
-            'orderService' => &$orderService,
-            'discountService' => &$this,
-            'orderProducts' => $order->getOrderProducts(),  //Siparişe ait ürün Listesi
-            'discountMessages' => [],
-            'orderTotal' => $order->getTotal(), //Siparis toplami
-            'discountedTotal' => $order->getTotal(), //Siparişten indirim düştükten sonra kalan fiyat
-            'totalDiscount' => 0, //Siparişten düşülen indirim toplamı
-            'discountTypes' => ArrayHelper::getReflactionClassWithFlip(DiscountType::class), //Hangi indirim yöntemi ile düşüş yapıldığının bilgisini almak için
-        ];
-
         $strategies = [
             new DiscountPercentOverPriceStrategy(), //Belirlenen sipariş toplam sayısına göre X% indirim eklenmesi.
             new DiscountFreePieceByCategoryAndSoldPieceStrategy(), //Belirlenen kategori bilgisine ve satın aldığı adete göre düşülecek olan adet fiyat bilgisini indirime ekler.
             new DiscountPercentByCategoryAndSoldCheapestStrategy() //Belirli kategori ve satış adetine göre en ucuz üründen belirlenen yüzde kadar indirim yapılır.
         ];
 
-        $discountManagerStrategy = new DiscountManagerStrategy();
+        $discountManagerStrategy = new DiscountManagerStrategy($orderService, $this);
         foreach ($strategies as $strategy) {
             $discountManagerStrategy->setStrategy($strategy);
-            $discountManagerStrategy->algorithm($data);
+            $discountManagerStrategy->runAlgorithm();
         }
 
-        return $discountManagerStrategy->getResult();
+        return $discountManagerStrategy->getAnalysisResult();
     }
 }

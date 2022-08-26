@@ -2,15 +2,13 @@
 
 namespace App\Interfaces\Strategy\Discount;
 
-use App\Service\DiscountService;
-use App\Service\OrderService;
-use Doctrine\Common\Collections\Collection;
+use App\Strategy\Discount\DiscountManagerStrategy;
 
 interface DiscountStrategyInterface
 {
     /**
-     * @param object $data
-     * @return void
+     * @param DiscountManagerStrategy $discountManagerStrategy
+     * @return mixed
      */
-    public function algorithm(object &$data);
+    public function runAlgorithm(DiscountManagerStrategy &$discountManagerStrategy);
 }
