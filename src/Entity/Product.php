@@ -39,7 +39,7 @@ class Product
      * @ORM\Column(type="decimal", precision=13, scale=2, options={"default" : 0})
      * @Groups({"product"})
      */
-    private string $price;
+    private float $price;
 
     /**
      * @ORM\Column(type="integer", options={"default" : 0})
@@ -51,7 +51,7 @@ class Product
      * @ORM\OneToMany(targetEntity=OrderProduct::class, mappedBy="product")
      * @Groups({"productOrderProductRelation"})
      */
-    private ArrayCollection $orderProducts;
+    private Collection $orderProducts;
 
     public function __construct()
     {
@@ -105,18 +105,18 @@ class Product
     }
 
     /**
-     * @return string
+     * @return float
      */
-    public function getPrice(): string
+    public function getPrice(): float
     {
         return $this->price;
     }
 
     /**
-     * @param string $price
+     * @param float $price
      * @return $this
      */
-    public function setPrice(string $price): self
+    public function setPrice(float $price): self
     {
         $this->price = $price;
 

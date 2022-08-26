@@ -65,13 +65,13 @@ class OrderProduct
      * @ORM\Column(type="decimal", precision=13, scale=2, options={"default" : 0})
      * @Groups({"orderProduct"})
      */
-    private string $unitPrice;
+    private float $unitPrice;
 
     /**
      * @ORM\Column(type="decimal", precision=13, scale=2, options={"default" : 0})
      * @Groups({"orderProduct"})
      */
-    private string $total;
+    private float $total;
 
     /**
      * @return Order
@@ -127,18 +127,18 @@ class OrderProduct
     }
 
     /**
-     * @return string
+     * @return float
      */
-    public function getUnitPrice(): string
+    public function getUnitPrice(): float
     {
         return $this->unitPrice;
     }
 
     /**
-     * @param string $unitPrice
+     * @param float $unitPrice
      * @return $this
      */
-    public function setUnitPrice(string $unitPrice): self
+    public function setUnitPrice(float $unitPrice): self
     {
         $this->unitPrice = $unitPrice;
 
@@ -146,18 +146,18 @@ class OrderProduct
     }
 
     /**
-     * @return string
+     * @return float
      */
-    public function getTotal(): string
+    public function getTotal(): float
     {
         return $this->total;
     }
 
     /**
-     * @param string $total
+     * @param float $total
      * @return $this
      */
-    public function setTotal(string $total): self
+    public function setTotal(float $total): self
     {
         $this->total = $total;
 

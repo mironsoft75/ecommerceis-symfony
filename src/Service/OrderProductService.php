@@ -17,17 +17,19 @@ class OrderProductService extends BaseService
         $this->repository = $repository;
         $this->orderService = $orderService;
         $this->productService = $productService;
+        $this->em = $this->repository->getEntityManager();
     }
 
     /**
      * @param array $criteria
      * @param array|null $orderBy
+     * @param bool $notFoundException
      * @return OrderProduct
      * @throws Exception
      */
-    public function getOrderProduct(array $criteria, array $orderBy = null): OrderProduct
+    public function getOrderProduct(array $criteria, array $orderBy = null, bool $notFoundException = true): OrderProduct
     {
-        return $this->findOneBy($criteria, $orderBy);
+        return $this->findOneBy($criteria, $orderBy, $notFoundException);
     }
 
     /**
@@ -58,16 +60,16 @@ class OrderProductService extends BaseService
     }
 
     /**
-     * @param $orderProductId
+     * @param int $orderProductId
      * @param array $attributes
      * @return void
      * @throws Exception
      */
-    public function updateOrderProduct($orderProductId, array $attributes)
+    public function updateOrderProduct(array $attributes, int $orderProductId)
     {
         $this->em->transactional(function () use ($orderProductId, $attributes) {
             $orderProduct = $this->getOrderProduct(['id' => $orderProductId]);
-            $product = $this->productService->getProduct(['id' => $attributes['product_id']]);
+            $product = $orderProduct->getProduct();
             $this->productService->checkStockQuantityByProduct($product, $attributes['quantity']);
 
             $this->orderService->updateOrderTotalByUpdateOrderProduct($orderProduct, $attributes['quantity']);

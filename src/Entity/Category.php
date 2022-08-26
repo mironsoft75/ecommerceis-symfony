@@ -32,7 +32,7 @@ class Category
      * @ORM\OneToMany(targetEntity=Product::class, mappedBy="category")
      * @Groups({"categoryProductRelation"})
      */
-    private ArrayCollection $products;
+    private Collection $products;
 
     public function __construct()
     {

@@ -45,7 +45,7 @@ class Customer
      * @ORM\OneToMany(targetEntity=Order::class, mappedBy="customer")
      * @Groups({"customerOrderRelation"})
      */
-    private ArrayCollection $orders;
+    private Collection $orders;
 
     public function __construct()
     {

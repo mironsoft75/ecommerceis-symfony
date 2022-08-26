@@ -11,6 +11,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * * @Route("/orders/order-product")
+ */
 class OrderProductController extends AbstractController
 {
     private OrderProductService $orderProductService;
@@ -21,7 +24,7 @@ class OrderProductController extends AbstractController
     }
 
     /**
-     * @Route ("/orders/product-order", name="store_order_product", methods={"POST"})
+     * @Route ("", name="store_order_product", methods={"POST"})
      * @param OrderProductStoreRequest $request
      * @return JsonResponse
      */
@@ -32,20 +35,20 @@ class OrderProductController extends AbstractController
     }
 
     /**
-     * @Route ("/orders/product-order/{orderProductId}", name="update_order_product", methods={"PUT"})
-     * @param $orderProductId
+     * @Route ("/{orderProductId}", name="update_order_product", methods={"PUT"})
+     * @param int $orderProductId
      * @param OrderProductUpdateRequest $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function update(OrderProductUpdateRequest $request, $orderProductId): JsonResponse
+    public function update(OrderProductUpdateRequest $request, int $orderProductId): JsonResponse
     {
-        $this->orderProductService->updateOrderProduct($orderProductId, $request->all());
+        $this->orderProductService->updateOrderProduct($request->all(), $orderProductId);
         return ResponseHelper::update();
     }
 
     /**
-     * @Route ("/orders/product-order/{orderProductId}", name="destroy_order_product", methods={"DELETE"})
+     * @Route ("/{orderProductId}", name="destroy_order_product", methods={"DELETE"})
      * @param $orderProductId
      * @return JsonResponse
      */

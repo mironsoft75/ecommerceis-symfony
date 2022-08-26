@@ -24,6 +24,8 @@ class OrderService extends BaseService
         $this->productService = $productService;
         $this->customerService = $customerService;
         $this->discountService = $discountService;
+
+        $this->em = $this->repository->getEntityManager();
     }
 
     /**
@@ -65,7 +67,9 @@ class OrderService extends BaseService
      */
     public function discount(): array
     {
-        return $this->discountService->getDiscountAnalysis($this);
+        return $this->em->transactional(function (){
+            return $this->discountService->getDiscountAnalysis($this);
+        });
     }
 
     /**

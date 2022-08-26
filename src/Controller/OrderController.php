@@ -10,6 +10,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * @Route("/orders")
+ */
 class OrderController extends AbstractController
 {
     private OrderService $orderService;
@@ -20,7 +23,7 @@ class OrderController extends AbstractController
     }
 
     /**
-     * @Route ("/orders", name="orders", methods={"GET"})
+     * @Route ("", name="orders", methods={"GET"})
      * @return JsonResponse
      * @throws Exception
      */
@@ -30,7 +33,7 @@ class OrderController extends AbstractController
     }
 
     /**
-     * @Route ("/orders/discount", name="order_discount", methods={"GET"})
+     * @Route ("/discount", name="order_discount", methods={"GET"})
      * @return JsonResponse
      */
     public function discount(): JsonResponse

@@ -16,12 +16,13 @@ class ProductService extends BaseService
     /**
      * @param array $criteria
      * @param array|null $orderBy
+     * @param bool $notFoundException
      * @return Product
      * @throws Exception
      */
-    public function getProduct(array $criteria, array $orderBy = null): Product
+    public function getProduct(array $criteria, array $orderBy = null, bool $notFoundException = true): Product
     {
-        return $this->findOneBy($criteria, $orderBy);
+        return $this->findOneBy($criteria, $orderBy, $notFoundException);
     }
 
     /**
@@ -56,6 +57,6 @@ class ProductService extends BaseService
      */
     public function getTotalQuantityPriceByProduct(Product $product, int $quantity)
     {
-        return ($product->getPrice() * $quantity);
+        return $product->getPrice() * $quantity;
     }
 }

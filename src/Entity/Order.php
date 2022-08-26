@@ -26,7 +26,7 @@ class Order
      * @ORM\Column(type="decimal", precision=13, scale=2, options={"default" : 0})
      * @Groups({"order"})
      */
-    private string $total;
+    private float $total;
 
     /**
      * @ORM\ManyToOne(targetEntity=Customer::class, inversedBy="orders")
@@ -39,7 +39,7 @@ class Order
      * @ORM\OneToMany(targetEntity=OrderProduct::class, mappedBy="order")
      * @Groups({"orderOrderProductRelation"})
      */
-    private ArrayCollection $orderProducts;
+    private Collection $orderProducts;
 
 
     public function __construct()
@@ -56,18 +56,18 @@ class Order
     }
 
     /**
-     * @return string
+     * @return float
      */
-    public function getTotal(): string
+    public function getTotal(): float
     {
         return $this->total;
     }
 
     /**
-     * @param string $total
+     * @param float $total
      * @return $this
      */
-    public function setTotal(string $total): self
+    public function setTotal(float $total): self
     {
         $this->total = $total;
 
