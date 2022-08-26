@@ -21,12 +21,13 @@ class DiscountService extends BaseService
     /**
      * @param array $criteria
      * @param array|null $orderBy
-     * @return Discount
+     * @param bool $notFoundException
+     * @return Discount|null
      * @throws Exception
      */
-    public function getDiscount(array $criteria, array $orderBy = null): Discount
+    public function getDiscount(array $criteria, array $orderBy = null, bool $notFoundException = true): ?Discount
     {
-        return $this->findOneBy($criteria, $orderBy);
+        return $this->findOneBy($criteria, $orderBy, $notFoundException);
     }
 
     /**

@@ -31,12 +31,13 @@ class OrderService extends BaseService
     /**
      * @param array $criteria
      * @param array|null $orderBy
-     * @return Order
+     * @param bool $notFoundException
+     * @return Order|null
      * @throws Exception
      */
-    public function getOrder(array $criteria, array $orderBy = null): Order
+    public function getOrder(array $criteria, array $orderBy = null, bool $notFoundException = true): ?Order
     {
-        return $this->findOneBy($criteria, $orderBy);
+        return $this->findOneBy($criteria, $orderBy, $notFoundException);
     }
 
     /**
@@ -52,6 +53,7 @@ class OrderService extends BaseService
     }
 
     /**
+     * Müşterinin siparişindeki tüm ürün bilgilerini döner.
      * @return mixed
      * @throws Exception
      */
@@ -63,6 +65,7 @@ class OrderService extends BaseService
     }
 
     /**
+     * Siparişteki ürünlere göre indirimleri hesaplar
      * @return array
      */
     public function discount(): array
@@ -73,6 +76,7 @@ class OrderService extends BaseService
     }
 
     /**
+     * Müşteriye ait default sipariş kaydını döner.
      * @return Order
      * @throws Exception
      */
@@ -89,6 +93,7 @@ class OrderService extends BaseService
     }
 
     /**
+     * Siparişe ürün eklendiğinde, ürün bilgisine göre sipariş totalinin artırır.
      * @param OrderProduct $orderProduct
      * @return void
      */
@@ -101,6 +106,7 @@ class OrderService extends BaseService
     }
 
     /**
+     * Siparişdeki ürün güncellendiğinde, ürün bilgisine göre sipariş totalinin günceller.
      * @param OrderProduct $orderProduct
      * @param int $quantity
      * @return void
@@ -116,6 +122,11 @@ class OrderService extends BaseService
         ]);
     }
 
+    /**
+     * Siparişdeki ürün silindiğinde, ürün bilgisine göre sipariş totalini günceller.
+     * @param OrderProduct $orderProduct
+     * @return void
+     */
     public function updateOrderTotalByDestroyOrderProduct(OrderProduct $orderProduct): void
     {
         $order = $orderProduct->getOrder();

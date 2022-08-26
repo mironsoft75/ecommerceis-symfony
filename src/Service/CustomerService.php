@@ -16,12 +16,13 @@ class CustomerService extends BaseService
     /**
      * @param array $criteria
      * @param array|null $orderBy
-     * @return Customer
+     * @param bool $notFoundException
+     * @return Customer|null
      * @throws Exception
      */
-    public function getCustomer(array $criteria, array $orderBy = null): Customer
+    public function getCustomer(array $criteria, array $orderBy = null, bool $notFoundException = true): ?Customer
     {
-        return $this->findOneBy($criteria, $orderBy);
+        return $this->findOneBy($criteria, $orderBy, $notFoundException);
     }
 
     /**

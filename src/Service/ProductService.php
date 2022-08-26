@@ -17,10 +17,10 @@ class ProductService extends BaseService
      * @param array $criteria
      * @param array|null $orderBy
      * @param bool $notFoundException
-     * @return Product
+     * @return Product|null
      * @throws Exception
      */
-    public function getProduct(array $criteria, array $orderBy = null, bool $notFoundException = true): Product
+    public function getProduct(array $criteria, array $orderBy = null, bool $notFoundException = true): ?Product
     {
         return $this->findOneBy($criteria, $orderBy, $notFoundException);
     }
