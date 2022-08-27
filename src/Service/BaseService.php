@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityNotFoundException;
 use Exception;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -66,7 +67,7 @@ class BaseService
     {
         $entity = $this->repository->findOneBy($criteria, $orderBy);
         if (is_null($entity) && $notFoundException) {
-            throw new Exception($this->repository->getClassName().' Entity not found according to given information');
+            throw (new EntityNotFoundException())::fromClassNameAndIdentifier($this->repository->getClassName(), $criteria);
         }
         return $entity;
     }
