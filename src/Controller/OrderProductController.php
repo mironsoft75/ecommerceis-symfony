@@ -37,7 +37,7 @@ class OrderProductController extends AbstractController
 
     /**
      * Siparişteki ürünü günceller
-     * @Route ("/{orderProductId}", name="update_order_product", methods={"PUT"})
+     * @Route ("/{orderProductId}", name="update_order_product", methods={"PUT"}, requirements={"orderProductId"="\d+"})
      * @param int $orderProductId
      * @param OrderProductUpdateRequest $request
      * @return JsonResponse
