@@ -10,6 +10,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class BaseRequest
 {
+    private RequestStack $requestStack;
     private ValidatorInterface $validator;
     private $attributes;
     private $errors;
@@ -19,8 +20,8 @@ class BaseRequest
      */
     public function __construct(RequestStack $request, ValidatorInterface $validator)
     {
+        $this->requestStack = $request;
         $this->validator = $validator;
-
         $this->attributes = RequestHelper::getStackJson($request);
         $this->validate();
         $this->hasError();
@@ -56,5 +57,14 @@ class BaseRequest
     public function all(): array
     {
         return $this->attributes;
+    }
+
+    /**
+     * @param $parameter
+     * @return mixed
+     */
+    public function getRouteParam($parameter)
+    {
+        return $this->requestStack->getCurrentRequest()->attributes->get($parameter);
     }
 }
