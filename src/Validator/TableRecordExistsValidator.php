@@ -33,7 +33,7 @@ class TableRecordExistsValidator extends ConstraintValidator
                 ->addViolation();
         } else {
             if (is_null($this->managerRegistry->getRepository($constraint->table)->findOneBy([
-                'id' => $value
+                'id' => $value ?? $constraint->id
             ]))) { //Entity mevcut degilse exception firlatilir
                 throw (new EntityNotFoundException())::fromClassNameAndIdentifier($constraint->table, [$value]);
             }

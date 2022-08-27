@@ -13,6 +13,7 @@ class TableRecordExists extends Constraint
 {
     public string $message = 'The value "{{ value }}" is not valid.';
     public string $table = '';
+    public ?string $id = null;
     public function __construct(string $table, $options = null, array $groups = null, $payload = null)
     {
         $options['table'] = $table;
