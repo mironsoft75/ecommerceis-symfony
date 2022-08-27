@@ -146,19 +146,4 @@ class OrderProductService extends BaseService
             'total' => $this->productService->getTotalQuantityPriceByProduct($product, $quantity)
         ]);
     }
-
-    /**
-     * OrderProduct'da aynı siparişe ait aynı ürün var mı ?
-     * @param int $productId
-     * @return bool
-     * @throws Exception
-     */
-    public function checkOrderProductBySomeProductIdExists(int $productId): bool
-    {
-        $orderProduct = $this->getOrderProductByProductId($productId);
-        if (!is_null($orderProduct)) {
-            return true;
-        }
-        return false;
-    }
 }
