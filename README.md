@@ -74,6 +74,9 @@ https://documenter.getpostman.com/view/22844490/VUqmvJvC
 |   |   |-- Discount
 |   |   |   `-- DiscountManagerStrategy.php
 |   |   |   `-- ...
+|   |-- Validator
+|   |    `-- TableRecordExists.php
+|   |    `-- TableRecordExistsValidator.php
 |   |-- docker
 |   |   |-- images
 |   |   |   |-- nginx
