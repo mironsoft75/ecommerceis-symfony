@@ -37,7 +37,7 @@ class OrderProductService extends BaseService
      * @return OrderProduct|null
      * @throws Exception
      */
-    public function getOrderProductByProductId(int $productId): ?OrderProduct
+    public function getOrderProductByOrderIdAndProductId(int $productId): ?OrderProduct
     {
         $order = $this->orderService->getDefaultOrder();
         return $this->getOrderProduct([
@@ -66,17 +66,16 @@ class OrderProductService extends BaseService
     public function storeOrderProduct(array $attributes): void
     {
         $this->em->transactional(function () use ($attributes) {
-            $orderProduct = $this->getOrderProductByProductId($attributes['product_id']); //Daha önceden bu ürün eklenmiş mi
+            $orderProduct = $this->getOrderProductByOrderIdAndProductId($attributes['product_id']); //OrderProduct'ı orderId ve productId göre çekilmesi.
             if (is_null($orderProduct)) { //Aynı ürün daha önceden eklenmediyse ekleme yapılır.
                 $product = $this->productService->getProduct(['id' => $attributes['product_id']]); // ürün mevcut mu ?
                 $this->productService->checkStockQuantityByProduct($product, $attributes['quantity']); //ürünün stoğu var mı ?
 
-                $orderProduct = $this->addOrderProduct($product, $attributes['quantity']); //ürünü siparişi kaydet
-                $this->orderService->updateOrderTotalByAddOrderProduct($orderProduct); //sipariş totalini güncelle.
-
+                $orderProduct = $this->addOrderProduct($product, $attributes['quantity']); //ürünü siparişe kaydet
+                $this->orderService->updateOrderTotalByAddOrderProduct($orderProduct); //eklemeye göre sipariş totalini günceller.
             } else { //ürün daha önce eklenmiş ve tekrar aynı ürünü ekleme yaptığı için adet güncellemesi yapılır.
                 $attributes["quantity"] = $orderProduct->getQuantity() + $attributes["quantity"];
-                $this->updateOrderProductPart($attributes, $orderProduct);
+                $this->updateOrderProductPart($attributes, $orderProduct); //güncelleme için gerekli işlemler yapılır.
             }
         });
     }
@@ -125,7 +124,7 @@ class OrderProductService extends BaseService
     {
         $this->em->transactional(function () use ($orderProductId) {
             $orderProduct = $this->getOrderProduct(['id' => $orderProductId]); //OrderProduct mevcut mu
-            $this->orderService->updateOrderTotalByDestroyOrderProduct($orderProduct); //Sipariş totalinden silencek olan OrderProduct totalini düşür.
+            $this->orderService->updateOrderTotalByDestroyOrderProduct($orderProduct); //Sipariş totalinden silinecek olan OrderProduct totalini düşür.
             $this->remove($orderProduct); //OrderProduct'dı sil
         });
     }

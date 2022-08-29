@@ -51,7 +51,7 @@ class OrderProductController extends AbstractController
 
     /**
      * Siparişten ürünü kaldırır.
-     * @Route ("/{orderProductId}", name="destroy_order_product", methods={"DELETE"})
+     * @Route ("/{orderProductId}", name="destroy_order_product", methods={"DELETE"}, requirements={"orderProductId"="\d+"})
      * @param $orderProductId
      * @return JsonResponse
      */
