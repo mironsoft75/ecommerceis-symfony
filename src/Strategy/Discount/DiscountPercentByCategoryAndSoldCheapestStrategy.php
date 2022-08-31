@@ -16,7 +16,7 @@ class DiscountPercentByCategoryAndSoldCheapestStrategy implements DiscountStrate
      */
     public function runAlgorithm(DiscountManagerStrategy &$dms): void
     {
-        $discountDetails = $dms->discountService->getDiscountBy([
+        $discountDetails = $dms->getDiscountService()->getDiscountBy([
             'type' => DiscountType::PERCENT_CATEGORY_SOLD_CHEAPEST,
             'status' => DiscountStatus::ACTIVE
         ]);
@@ -25,7 +25,7 @@ class DiscountPercentByCategoryAndSoldCheapestStrategy implements DiscountStrate
             $jsonData = $discountDetail->getJsonData();
 
             $minBuyPrice = 0;
-            foreach ($dms->orderProducts as $orderProduct) {
+            foreach ($dms->getOrderProducts() as $orderProduct) {
                 if ($orderProduct->getProduct()->getCategory()->getId() == $jsonData['categoryId'] &&
                     $orderProduct->getQuantity() >= $jsonData['minBuyPiece']) {
 
@@ -40,7 +40,7 @@ class DiscountPercentByCategoryAndSoldCheapestStrategy implements DiscountStrate
             if ($minBuyPrice != 0) {
                 $discountAmount = round(CalculationHelper::calculatePercent($minBuyPrice, $jsonData['percent']), 2);
                 $dms->calculateDiscountedTotalAndTotalDiscountByDiscountAmount($discountAmount);
-                $dms->addDiscountMessage($dms->discountTypes[DiscountType::PERCENT_CATEGORY_SOLD_CHEAPEST], $discountAmount);
+                $dms->addDiscountMessage($dms->getDiscountTypes()[DiscountType::PERCENT_CATEGORY_SOLD_CHEAPEST], $discountAmount);
             }
         }
     }

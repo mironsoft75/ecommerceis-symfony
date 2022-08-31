@@ -15,7 +15,7 @@ class DiscountFreePieceByCategoryAndSoldPieceStrategy implements DiscountStrateg
      */
     public function runAlgorithm(DiscountManagerStrategy &$dms): void
     {
-        $discountDetails = $dms->discountService->getDiscountBy([
+        $discountDetails = $dms->getDiscountService()->getDiscountBy([
             'type' => DiscountType::FREE_PIECE_BY_CATEGORY_AND_SOLD_PIECE,
             'status' => DiscountStatus::ACTIVE
         ]);
@@ -23,13 +23,13 @@ class DiscountFreePieceByCategoryAndSoldPieceStrategy implements DiscountStrateg
         foreach ($discountDetails as $discountDetail) {
             $jsonData = $discountDetail->getJsonData();
 
-            foreach ($dms->orderProducts as $orderProduct) {
+            foreach ($dms->getOrderProducts() as $orderProduct) {
                 if ($orderProduct->getProduct()->getCategory()->getId() == $jsonData['categoryId']
                     && $orderProduct->getQuantity() == $jsonData['buyPiece']) {
 
                     $discountAmount = round($orderProduct->getUnitPrice() * $jsonData['freePiece'], 2);
                     $dms->calculateDiscountedTotalAndTotalDiscountByDiscountAmount($discountAmount);
-                    $dms->addDiscountMessage($dms->discountTypes[DiscountType::FREE_PIECE_BY_CATEGORY_AND_SOLD_PIECE], $discountAmount);
+                    $dms->addDiscountMessage($dms->getDiscountTypes()[DiscountType::FREE_PIECE_BY_CATEGORY_AND_SOLD_PIECE], $discountAmount);
                     break;
                 }
             }

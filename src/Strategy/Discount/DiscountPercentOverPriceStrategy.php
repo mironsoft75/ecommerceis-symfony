@@ -16,17 +16,17 @@ class DiscountPercentOverPriceStrategy implements DiscountStrategyInterface
      */
     public function runAlgorithm(DiscountManagerStrategy &$dms): void
     {
-        $discountDetails = $dms->discountService->getDiscountBy([
+        $discountDetails = $dms->getDiscountService()->getDiscountBy([
             'type' => DiscountType::PERCENT_OVER_PRICE,
             'status' => DiscountStatus::ACTIVE
         ]);
 
         foreach ($discountDetails as $discountDetail) {
             $jsonData = $discountDetail->getJsonData();
-            if ($dms->orderTotal >= $jsonData['overPrice']) {
-                $discountAmount = CalculationHelper::calculatePercent($dms->orderTotal, $jsonData['percent']); //Totalden yüzde alımı
+            if ($dms->getOrderTotal() >= $jsonData['overPrice']) {
+                $discountAmount = CalculationHelper::calculatePercent($dms->getOrderTotal(), $jsonData['percent']); //Totalden yüzde alımı
                 $dms->calculateDiscountedTotalAndTotalDiscountByDiscountAmount($discountAmount);
-                $dms->addDiscountMessage($dms->discountTypes[DiscountType::PERCENT_OVER_PRICE], $discountAmount);
+                $dms->addDiscountMessage($dms->getDiscountTypes()[DiscountType::PERCENT_OVER_PRICE], $discountAmount);
             }
         }
     }
