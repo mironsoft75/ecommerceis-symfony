@@ -47,9 +47,16 @@ class Customer
      */
     private Collection $orders;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Cart::class, mappedBy="customer")
+     * @Groups({"customerCartRelation"})
+     */
+    private Collection $carts;
+
     public function __construct()
     {
         $this->orders = new ArrayCollection();
+        $this->carts = new ArrayCollection();
     }
 
     /**
@@ -123,5 +130,30 @@ class Customer
     public function getOrders(): Collection
     {
         return $this->orders;
+    }
+
+    /**
+     * @param Collection $orders
+     * @return void
+     */
+    public function setOrders(Collection $orders): void
+    {
+        $this->orders = $orders;
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getCarts(): Collection
+    {
+        return $this->carts;
+    }
+
+    /**
+     * @param Collection $carts
+     */
+    public function setCarts(Collection $carts): void
+    {
+        $this->carts = $carts;
     }
 }

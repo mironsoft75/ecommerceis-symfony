@@ -53,9 +53,16 @@ class Product
      */
     private Collection $orderProducts;
 
+    /**
+     * @ORM\OneToMany(targetEntity=CartProduct::class, mappedBy="product")
+     * @Groups({"productCartProductRelation"})
+     */
+    private Collection $cartProducts;
+
     public function __construct()
     {
         $this->orderProducts = new ArrayCollection();
+        $this->cartProducts = new ArrayCollection();
     }
 
     /**
@@ -148,5 +155,31 @@ class Product
     public function getOrderProducts(): Collection
     {
         return $this->orderProducts;
+    }
+
+    /**
+     * @param Collection $orderProducts
+     * @return void
+     */
+    public function setOrderProducts(Collection $orderProducts): void
+    {
+        $this->orderProducts = $orderProducts;
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getCartProducts(): Collection
+    {
+        return $this->cartProducts;
+    }
+
+    /**
+     * @param Collection $cartProducts
+     * @return void
+     */
+    public function setCartProducts(Collection $cartProducts): void
+    {
+        $this->cartProducts = $cartProducts;
     }
 }
