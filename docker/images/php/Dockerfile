@@ -11,6 +11,8 @@ RUN apk update \
     icu-dev \
     postgresql-libs \
     postgresql-dev \
+    rabbitmq-c-dev \
+    ${PHPIZE_DEPS} \
     && docker-php-ext-configure \
     intl \
     && docker-php-ext-install \
@@ -18,5 +20,13 @@ RUN apk update \
     opcache \
     pgsql \
     pdo_pgsql \
-    && apk del  \
-    postgresql-dev
+    sockets \
+    && pecl install \
+    amqp \
+    redis \
+    && docker-php-ext-enable \
+    amqp \
+    redis \
+    && apk del \
+    postgresql-dev \
+    ${PHPIZE_DEPS} \

@@ -1,4 +1,4 @@
-## Installationreadme
+## Installation
 
 ### Docker Compose Install & Run
 ```
@@ -30,6 +30,9 @@ php bin/console doctrine:migrations:migrate --seed
 ## About
 Postman API ve Example Request için:\
 https://documenter.getpostman.com/view/22844490/VUqmvJvC
+
+## Packages
+- RabbitMQ: `composer require amqp-messenger`
 
 ### File Structure
 ```
