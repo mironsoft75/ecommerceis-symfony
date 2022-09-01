@@ -19,6 +19,8 @@ class CartProductStoreRequest extends BaseRequest
             'quantity' => [
                 new Assert\NotBlank(),
                 new Assert\Type('integer'),
+                //ürünün stoğu var mı ?
+                new AcmeAssert\IsTableFieldEqualOrBig(Product::class, 'stock', $this->getAttributes()['product_id'], 'products.stock')
             ]
         ]);
     }

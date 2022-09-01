@@ -12,7 +12,7 @@ class BaseRequest
 {
     private RequestStack $requestStack;
     private ValidatorInterface $validator;
-    private $attributes;
+    private array $attributes;
     private $errors;
 
     /**
@@ -67,4 +67,21 @@ class BaseRequest
     {
         return $this->requestStack->getCurrentRequest()->attributes->get($parameter);
     }
+
+    /**
+     * @return array
+     */
+    public function getAttributes(): array
+    {
+        return $this->attributes;
+    }
+
+    /**
+     * @param array $attributes
+     */
+    public function setAttributes(array $attributes): void
+    {
+        $this->attributes = $attributes;
+    }
+
 }

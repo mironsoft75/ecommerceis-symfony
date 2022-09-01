@@ -68,9 +68,7 @@ class CartProductService extends BaseService
         $this->em->transactional(function () use ($attributes) {
             $cartProduct = $this->getCartProductByCartIdAndProductId($attributes['product_id']); //CartProduct'ı cartId ve productId göre çekilmesi.
             if (is_null($cartProduct)) { //Aynı ürün daha önceden eklenmediyse ekleme yapılır.
-                $product = $this->productService->getProduct(['id' => $attributes['product_id']]); // ürün mevcut mu ?
-                $this->productService->checkStockQuantityByProduct($product, $attributes['quantity']); //ürünün stoğu var mı ?
-
+                $product = $this->productService->getProduct(['id' => $attributes['product_id']]); // ürün mevcut mu ve ürün bilgisini getirme
                 $cartProduct = $this->addCartProduct($product, $attributes['quantity']); //ürünü siparişe kaydet
                 $this->cartService->updateCartTotalByAddCartProduct($cartProduct); //eklemeye göre sipariş totalini günceller.
             } else { //ürün daha önce eklenmiş ve tekrar aynı ürünü ekleme yaptığı için adet güncellemesi yapılır.
