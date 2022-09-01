@@ -6,26 +6,18 @@ use App\Entity\Order;
 use App\Entity\OrderProduct;
 use App\Repository\OrderRepository;
 use Exception;
-use ReflectionException;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class OrderService extends BaseService
 {
-    private ProductService $productService;
     private CustomerService $customerService;
-    private DiscountService $discountService;
 
     public function __construct(OrderRepository $repository, SerializerInterface $serializer,
-                                ProductService  $productService, CustomerService $customerService,
-                                DiscountService $discountService)
+                                CustomerService $customerService)
     {
         $this->repository = $repository;
         $this->serializer = $serializer;
-
-        $this->productService = $productService;
         $this->customerService = $customerService;
-        $this->discountService = $discountService;
-
         $this->em = $this->repository->getEntityManager();
     }
 
@@ -61,18 +53,8 @@ class OrderService extends BaseService
     public function index()
     {
         return json_decode($this->serializer->serialize($this->getDefaultOrder(), 'json', [
-            'groups' => ['order', 'orderOrderProductRelation', 'orderProduct', 'orderProductProductRelation', 'product']
+            'groups' => ['order', 'orderOrderProductRelation', 'orderProduct']
         ]));
-    }
-
-    /**
-     * Siparişteki ürünlere göre indirimleri hesaplar
-     * @return array
-     * @throws ReflectionException
-     */
-    public function discount(): array
-    {
-        return $this->discountService->getDiscountAnalysis($this);
     }
 
     /**
@@ -102,36 +84,6 @@ class OrderService extends BaseService
         $order = $orderProduct->getOrder();
         $this->update($order, [
             'total' => ($order->getTotal() + $orderProduct->getTotal())
-        ]);
-    }
-
-    /**
-     * Siparişdeki ürün güncellendiğinde, ürün bilgisine göre sipariş totalinin günceller.
-     * @param OrderProduct $orderProduct
-     * @param int $quantity
-     * @return void
-     */
-    public function updateOrderTotalByUpdateOrderProduct(OrderProduct $orderProduct, int $quantity): void
-    {
-        $order = $orderProduct->getOrder();
-        $product = $orderProduct->getProduct();
-        $total = $order->getTotal() - $orderProduct->getTotal();
-        $total = $total + $this->productService->getTotalQuantityPriceByProduct($product, $quantity);
-        $this->update($order, [
-            'total' => $total
-        ]);
-    }
-
-    /**
-     * Siparişdeki ürün silindiğinde, ürün bilgisine göre sipariş totalini günceller.
-     * @param OrderProduct $orderProduct
-     * @return void
-     */
-    public function updateOrderTotalByDestroyOrderProduct(OrderProduct $orderProduct): void
-    {
-        $order = $orderProduct->getOrder();
-        $this->update($order, [
-            'total' => $order->getTotal() - $orderProduct->getTotal()
         ]);
     }
 }

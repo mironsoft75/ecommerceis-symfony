@@ -62,7 +62,7 @@ class CartService extends BaseService
     public function index()
     {
         return json_decode($this->serializer->serialize($this->getDefaultCart(), 'json', [
-            'groups' => ['cart', 'cartOrderProductRelation', 'cartProduct']
+            'groups' => ['cart', 'cartCartProductRelation', 'cartProduct']
         ]));
     }
 

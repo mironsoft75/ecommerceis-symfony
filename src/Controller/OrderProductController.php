@@ -3,10 +3,8 @@
 namespace App\Controller;
 
 use App\FormRequest\OrderProductStoreRequest;
-use App\FormRequest\OrderProductUpdateRequest;
 use App\Helper\ResponseHelper;
 use App\Service\OrderProductService;
-use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -33,31 +31,5 @@ class OrderProductController extends AbstractController
     {
         $this->orderProductService->storeOrderProduct($request->all());
         return ResponseHelper::store();
-    }
-
-    /**
-     * Siparişteki ürünü günceller
-     * @Route ("/{orderProductId}", name="update_order_product", methods={"PUT"}, requirements={"orderProductId"="\d+"})
-     * @param int $orderProductId
-     * @param OrderProductUpdateRequest $request
-     * @return JsonResponse
-     * @throws Exception
-     */
-    public function update(OrderProductUpdateRequest $request, int $orderProductId): JsonResponse
-    {
-        $this->orderProductService->updateOrderProduct($request->all(), $orderProductId);
-        return ResponseHelper::update();
-    }
-
-    /**
-     * Siparişten ürünü kaldırır.
-     * @Route ("/{orderProductId}", name="destroy_order_product", methods={"DELETE"}, requirements={"orderProductId"="\d+"})
-     * @param $orderProductId
-     * @return JsonResponse
-     */
-    public function destroy($orderProductId): JsonResponse
-    {
-        $this->orderProductService->destroyOrderProduct($orderProductId);
-        return ResponseHelper::destroy();
     }
 }

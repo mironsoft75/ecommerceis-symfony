@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Helper\ResponseHelper;
 use App\Service\OrderService;
 use Exception;
-use ReflectionException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -31,16 +30,5 @@ class OrderController extends AbstractController
     public function index(): JsonResponse
     {
         return ResponseHelper::success($this->orderService->index());
-    }
-
-    /**
-     * Siparişteki ürünlere göre indirimleri hesaplar
-     * @Route ("/discount", name="order_discount", methods={"GET"})
-     * @return JsonResponse
-     * @throws ReflectionException
-     */
-    public function discount(): JsonResponse
-    {
-        return ResponseHelper::success($this->orderService->discount());
     }
 }
