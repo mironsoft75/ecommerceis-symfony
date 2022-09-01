@@ -33,7 +33,6 @@ class CartFixtures extends Fixture
         $dataCount = count($data) - 1;
 
         $products = $manager->getRepository(Product::class)->findAll();
-        $productCount = count($products) - 1;
         $customers = $manager->getRepository(Customer::class)->findAll();
 
         foreach ($customers as $customer) {
@@ -42,21 +41,21 @@ class CartFixtures extends Fixture
             $cart->setCustomer($customer);
             $cart->setTotal($cartTotal);
             $manager->persist($cart);
-            $purchaseCount = rand(1, 4); //siparese kac adet urun eklenecek
-            for ($i = 0; $i < $purchaseCount; $i++) {
+
+            foreach ($products as $product) {
                 $randomData = $data[rand(0, $dataCount)];
-                $randomProduct = $products[rand(0, $productCount)];
-                $total = $randomProduct->getPrice() * $randomData['quantity'];
+                $total = $product->getPrice() * $randomData['quantity'];
                 $cartTotal += $total;
 
                 $cartProduct = new CartProduct();
                 $cartProduct->setCart($cart);
-                $cartProduct->setProduct($randomProduct);
+                $cartProduct->setProduct($product);
                 $cartProduct->setQuantity($randomData['quantity']);
-                $cartProduct->setUnitPrice($randomProduct->getPrice());
+                $cartProduct->setUnitPrice($product->getPrice());
                 $cartProduct->setTotal($total);
                 $manager->persist($cartProduct);
             }
+
             $cart->setTotal($cartTotal); //Urun totalinin siparise yansitilmasi
             $manager->persist($cart);
         }

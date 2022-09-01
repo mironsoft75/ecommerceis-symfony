@@ -15,43 +15,40 @@ class ProductFixtures extends Fixture
         $data = [
             [
                 "name" => "Black&Decker A7062 40 Parça Cırcırlı Tornavida Seti",
-                "category_id" => 1,
                 "price" => 120.75,
                 "stock" => 10
             ],
             [
                 'name' => 'Reko Mini Tamir Hassas Tornavida Seti 32\'li',
-                'category_id' => 1,
                 'price' => 49.50,
                 'stock' => 10,
             ],
             [
                 'name' => 'Viko Karre Anahtar - Beyaz',
-                'category_id' => 2,
                 'price' => 11.28,
                 'stock' => 10,
             ],
             [
                 'name' => 'Legrand Salbei Anahtar, Alüminyum',
-                'category_id' => 2,
                 'price' => 22.80,
                 'stock' => 10,
             ],
             [
                 'name' => 'Schneider Asfora Beyaz Komütatör',
-                'category_id' => 2,
                 'price' => 12.95,
                 'stock' => 10,
             ]
         ];
 
         $categories = $manager->getRepository(Category::class)->findAll();
-        $categoryCount = count($categories);
+        $categoryCount = count($categories) - 1;
+        $categoryIndex = 0;
 
         foreach ($data as $item) {
             $product = new Product();
             $product->setName($item['name']);
-            $product->setCategory($categories[rand(0, $categoryCount - 1)]);
+            $product->setCategory($categories[$categoryIndex]);
+            $categoryIndex >= $categoryCount ? $categoryIndex = 0 : $categoryIndex++;
             $product->setPrice($item['price']);
             $product->setStock($item['stock']);
             $manager->persist($product);

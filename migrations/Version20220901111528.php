@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20220822074031 extends AbstractMigration
+final class Version20220901111528 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -20,6 +20,11 @@ final class Version20220822074031 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
+        $this->addSql('CREATE TABLE cart_product (id SERIAL NOT NULL, cart_id INT NOT NULL, product_id INT NOT NULL, quantity INT NOT NULL, unit_price NUMERIC(13, 2) DEFAULT \'0\' NOT NULL, total NUMERIC(13, 2) DEFAULT \'0\' NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE INDEX IDX_2890CCAA1AD5CDBF ON cart_product (cart_id)');
+        $this->addSql('CREATE INDEX IDX_2890CCAA4584665A ON cart_product (product_id)');
+        $this->addSql('CREATE TABLE carts (id SERIAL NOT NULL, customer_id INT NOT NULL, total NUMERIC(13, 2) DEFAULT \'0\' NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE INDEX IDX_4E004AAC9395C3F3 ON carts (customer_id)');
         $this->addSql('CREATE TABLE categories (id SERIAL NOT NULL, name VARCHAR(255) NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE TABLE customers (id SERIAL NOT NULL, name VARCHAR(255) NOT NULL, since DATE NOT NULL, revenue NUMERIC(13, 2) DEFAULT \'0\' NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE TABLE discounts (id SERIAL NOT NULL, type INT NOT NULL, name VARCHAR(255) NOT NULL, description VARCHAR(2500) DEFAULT NULL, status BOOLEAN NOT NULL, json_data TEXT NOT NULL, PRIMARY KEY(id))');
@@ -42,6 +47,9 @@ final class Version20220822074031 extends AbstractMigration
         $$ LANGUAGE plpgsql;');
         $this->addSql('DROP TRIGGER IF EXISTS notify_trigger ON messenger_messages;');
         $this->addSql('CREATE TRIGGER notify_trigger AFTER INSERT OR UPDATE ON messenger_messages FOR EACH ROW EXECUTE PROCEDURE notify_messenger_messages();');
+        $this->addSql('ALTER TABLE cart_product ADD CONSTRAINT FK_2890CCAA1AD5CDBF FOREIGN KEY (cart_id) REFERENCES carts (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
+        $this->addSql('ALTER TABLE cart_product ADD CONSTRAINT FK_2890CCAA4584665A FOREIGN KEY (product_id) REFERENCES products (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
+        $this->addSql('ALTER TABLE carts ADD CONSTRAINT FK_4E004AAC9395C3F3 FOREIGN KEY (customer_id) REFERENCES customers (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE order_product ADD CONSTRAINT FK_2530ADE68D9F6D38 FOREIGN KEY (order_id) REFERENCES orders (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE order_product ADD CONSTRAINT FK_2530ADE64584665A FOREIGN KEY (product_id) REFERENCES products (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE orders ADD CONSTRAINT FK_E52FFDEE9395C3F3 FOREIGN KEY (customer_id) REFERENCES customers (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
@@ -51,10 +59,15 @@ final class Version20220822074031 extends AbstractMigration
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
+        $this->addSql('ALTER TABLE cart_product DROP CONSTRAINT FK_2890CCAA1AD5CDBF');
+        $this->addSql('ALTER TABLE cart_product DROP CONSTRAINT FK_2890CCAA4584665A');
+        $this->addSql('ALTER TABLE carts DROP CONSTRAINT FK_4E004AAC9395C3F3');
         $this->addSql('ALTER TABLE order_product DROP CONSTRAINT FK_2530ADE68D9F6D38');
         $this->addSql('ALTER TABLE order_product DROP CONSTRAINT FK_2530ADE64584665A');
         $this->addSql('ALTER TABLE orders DROP CONSTRAINT FK_E52FFDEE9395C3F3');
         $this->addSql('ALTER TABLE products DROP CONSTRAINT FK_B3BA5A5A12469DE2');
+        $this->addSql('DROP TABLE cart_product');
+        $this->addSql('DROP TABLE carts');
         $this->addSql('DROP TABLE categories');
         $this->addSql('DROP TABLE customers');
         $this->addSql('DROP TABLE discounts');
