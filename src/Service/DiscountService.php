@@ -43,11 +43,11 @@ class DiscountService extends BaseService
     }
 
     /**
-     * @param OrderService $orderService
+     * @param CartService $cartService
      * @return array
      * @throws ReflectionException
      */
-    public function getDiscountAnalysis(OrderService $orderService): array
+    public function getDiscountAnalysis(CartService $cartService): array
     {
         $strategies = [
             new DiscountPercentOverPriceStrategy(), //Belirlenen sipariş toplam sayısına göre X% indirim eklenmesi.
@@ -55,7 +55,7 @@ class DiscountService extends BaseService
             new DiscountPercentByCategoryAndSoldCheapestStrategy() //Belirli kategori ve satış adetine göre en ucuz üründen belirlenen yüzde kadar indirim yapılır.
         ];
 
-        $discountManagerStrategy = new DiscountManagerStrategy($orderService, $this);
+        $discountManagerStrategy = new DiscountManagerStrategy($cartService, $this);
         foreach ($strategies as $strategy) {
             $discountManagerStrategy->setStrategy($strategy);
             $discountManagerStrategy->runAlgorithm();

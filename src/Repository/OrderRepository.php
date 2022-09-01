@@ -3,9 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Order;
-use App\Helper\GeneralHelper;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**

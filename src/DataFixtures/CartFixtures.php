@@ -2,15 +2,14 @@
 
 namespace App\DataFixtures;
 
-use App\Entity\Category;
+use App\Entity\Cart;
+use App\Entity\CartProduct;
 use App\Entity\Customer;
-use App\Entity\Order;
-use App\Entity\OrderProduct;
 use App\Entity\Product;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
-class OrderFixtures extends Fixture
+class CartFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
@@ -37,29 +36,29 @@ class OrderFixtures extends Fixture
         $productCount = count($products) - 1;
         $customers = $manager->getRepository(Customer::class)->findAll();
 
-        foreach ($customers as $customer){
-            $orderTotal = 0;
-            $order = new Order(); //siparis
-            $order->setCustomer($customer);
-            $order->setTotal($orderTotal);
-            $manager->persist($order);
-            $purchaseCount = rand(1,4); //siparese kac adet urun eklenecek
-            for($i = 0; $i < $purchaseCount; $i++){
+        foreach ($customers as $customer) {
+            $cartTotal = 0;
+            $cart = new Cart(); //siparis
+            $cart->setCustomer($customer);
+            $cart->setTotal($cartTotal);
+            $manager->persist($cart);
+            $purchaseCount = rand(1, 4); //siparese kac adet urun eklenecek
+            for ($i = 0; $i < $purchaseCount; $i++) {
                 $randomData = $data[rand(0, $dataCount)];
                 $randomProduct = $products[rand(0, $productCount)];
                 $total = $randomProduct->getPrice() * $randomData['quantity'];
-                $orderTotal += $total;
+                $cartTotal += $total;
 
-                $orderProduct = new OrderProduct();
-                $orderProduct->setOrder($order);
-                $orderProduct->setProduct($randomProduct);
-                $orderProduct->setQuantity($randomData['quantity']);
-                $orderProduct->setUnitPrice($randomProduct->getPrice());
-                $orderProduct->setTotal($total);
-                $manager->persist($orderProduct);
+                $cartProduct = new CartProduct();
+                $cartProduct->setCart($cart);
+                $cartProduct->setProduct($randomProduct);
+                $cartProduct->setQuantity($randomData['quantity']);
+                $cartProduct->setUnitPrice($randomProduct->getPrice());
+                $cartProduct->setTotal($total);
+                $manager->persist($cartProduct);
             }
-            $order->setTotal($orderTotal); //Urun totalinin siparise yansitilmasi
-            $manager->persist($order);
+            $cart->setTotal($cartTotal); //Urun totalinin siparise yansitilmasi
+            $manager->persist($cart);
         }
 
         $manager->flush();

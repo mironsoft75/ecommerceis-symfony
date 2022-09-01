@@ -23,11 +23,11 @@ class DiscountFreePieceByCategoryAndSoldPieceStrategy implements DiscountStrateg
         foreach ($discountDetails as $discountDetail) {
             $jsonData = $discountDetail->getJsonData();
 
-            foreach ($dms->getOrderProducts() as $orderProduct) {
-                if ($orderProduct->getProduct()->getCategory()->getId() == $jsonData['categoryId']
-                    && $orderProduct->getQuantity() == $jsonData['buyPiece']) {
+            foreach ($dms->getCartProducts() as $cartProduct) {
+                if ($cartProduct->getProduct()->getCategory()->getId() == $jsonData['categoryId']
+                    && $cartProduct->getQuantity() == $jsonData['buyPiece']) {
 
-                    $discountAmount = round($orderProduct->getUnitPrice() * $jsonData['freePiece'], 2);
+                    $discountAmount = round($cartProduct->getUnitPrice() * $jsonData['freePiece'], 2);
                     $dms->calculateDiscountedTotalAndTotalDiscountByDiscountAmount($discountAmount);
                     $dms->addDiscountMessage($dms->getDiscountTypes()[DiscountType::FREE_PIECE_BY_CATEGORY_AND_SOLD_PIECE], $discountAmount);
                     break;

@@ -2,12 +2,12 @@
 
 namespace App\Strategy\Discount;
 
-use App\Entity\Order;
+use App\Entity\Cart;
 use App\Enum\DiscountType;
 use App\Helper\ArrayHelper;
 use App\Interfaces\Strategy\Discount\DiscountStrategyInterface;
+use App\Service\CartService;
 use App\Service\DiscountService;
-use App\Service\OrderService;
 use Doctrine\Common\Collections\Collection;
 use Exception;
 use ReflectionException;
@@ -16,30 +16,30 @@ class DiscountManagerStrategy
 {
     private DiscountStrategyInterface $strategy;
 
-    private OrderService $orderService;
+    private CartService $cartService;
     private DiscountService $discountService;
-    private Order $order;
-    private Collection $orderProducts;
+    private Cart $cart;
+    private Collection $cartProducts;
     private array $discountMessages = [];
-    private float $orderTotal; //Siparis toplami
+    private float $cartTotal; //Siparis toplami
     private float $discountedTotal; //Siparişten indirim düştükten sonra kalan fiyat
     private float $totalDiscount = 0; //Siparişten düşülen toplam indirim
     private array $discountTypes; //Hangi indirim yöntemi ile düşüş yapıldığının bilgisini almak için
 
     /**
-     * @param OrderService $orderService
+     * @param CartService $cartService
      * @param DiscountService $discountService
      * @throws ReflectionException
      * @throws Exception
      */
-    public function __construct(OrderService $orderService, DiscountService $discountService)
+    public function __construct(CartService $cartService, DiscountService $discountService)
     {
-        $this->setOrderService($orderService);
+        $this->setCartService($cartService);
         $this->setDiscountService($discountService);
-        $this->setOrder($this->getOrderService()->getDefaultOrder());
-        $this->setOrderProducts($this->getOrder()->getOrderProducts());
-        $this->setOrderTotal($this->getOrder()->getTotal());
-        $this->setDiscountedTotal($this->getOrder()->getTotal());
+        $this->setCart($this->getCartService()->getDefaultCart());
+        $this->setCartProducts($this->getCart()->getCartProducts());
+        $this->setCartTotal($this->getCart()->getTotal());
+        $this->setDiscountedTotal($this->getCart()->getTotal());
         $this->setDiscountTypes(ArrayHelper::getReflactionClassWithFlip(DiscountType::class));
     }
 
@@ -66,11 +66,11 @@ class DiscountManagerStrategy
     public function getAnalysisResult(): array
     {
         return [
-            'order_id' => $this->order->getId(),
-            'discount' => $this->discountMessages,
-            "totalDiscount" => $this->totalDiscount,
-            "discountedTotal" => $this->discountedTotal,
-            "total" => $this->orderTotal
+            'cart_id' => $this->getCart()->getId(),
+            'discount' => $this->getDiscountMessages(),
+            "totalDiscount" => $this->getTotalDiscount(),
+            "discountedTotal" => $this->getDiscountedTotal(),
+            "total" => $this->getCartTotal()
         ];
     }
 
@@ -84,7 +84,7 @@ class DiscountManagerStrategy
         $this->discountMessages[] = [
             "discountReason" => $discountReason,
             "discountAmount" => $discountAmount,
-            "subtotal" => $this->discountedTotal
+            "subtotal" => $this->getDiscountedTotal()
         ];
     }
 
@@ -96,22 +96,6 @@ class DiscountManagerStrategy
     {
         $this->setDiscountedTotal(round($this->getDiscountedTotal() - $discountAmount, 2)); //Toplam fiyattan düşüş
         $this->setTotalDiscount(round($this->getTotalDiscount() + $discountAmount, 2)); //İndirim toplamı arttırma
-    }
-
-    /**
-     * @return OrderService
-     */
-    public function getOrderService(): OrderService
-    {
-        return $this->orderService;
-    }
-
-    /**
-     * @param OrderService $orderService
-     */
-    public function setOrderService(OrderService $orderService): void
-    {
-        $this->orderService = $orderService;
     }
 
     /**
@@ -131,38 +115,6 @@ class DiscountManagerStrategy
     }
 
     /**
-     * @return Order
-     */
-    public function getOrder(): Order
-    {
-        return $this->order;
-    }
-
-    /**
-     * @param Order $order
-     */
-    public function setOrder(Order $order): void
-    {
-        $this->order = $order;
-    }
-
-    /**
-     * @return Collection
-     */
-    public function getOrderProducts(): Collection
-    {
-        return $this->orderProducts;
-    }
-
-    /**
-     * @param Collection $orderProducts
-     */
-    public function setOrderProducts(Collection $orderProducts): void
-    {
-        $this->orderProducts = $orderProducts;
-    }
-
-    /**
      * @return array
      */
     public function getDiscountMessages(): array
@@ -176,22 +128,6 @@ class DiscountManagerStrategy
     public function setDiscountMessages(array $discountMessages): void
     {
         $this->discountMessages = $discountMessages;
-    }
-
-    /**
-     * @return float
-     */
-    public function getOrderTotal(): float
-    {
-        return $this->orderTotal;
-    }
-
-    /**
-     * @param float $orderTotal
-     */
-    public function setOrderTotal(float $orderTotal): void
-    {
-        $this->orderTotal = $orderTotal;
     }
 
     /**
@@ -240,5 +176,69 @@ class DiscountManagerStrategy
     public function setDiscountTypes(array $discountTypes): void
     {
         $this->discountTypes = $discountTypes;
+    }
+
+    /**
+     * @return CartService
+     */
+    public function getCartService(): CartService
+    {
+        return $this->cartService;
+    }
+
+    /**
+     * @param CartService $cartService
+     */
+    public function setCartService(CartService $cartService): void
+    {
+        $this->cartService = $cartService;
+    }
+
+    /**
+     * @return Cart
+     */
+    public function getCart(): Cart
+    {
+        return $this->cart;
+    }
+
+    /**
+     * @param Cart $cart
+     */
+    public function setCart(Cart $cart): void
+    {
+        $this->cart = $cart;
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getCartProducts(): Collection
+    {
+        return $this->cartProducts;
+    }
+
+    /**
+     * @param Collection $cartProducts
+     */
+    public function setCartProducts(Collection $cartProducts): void
+    {
+        $this->cartProducts = $cartProducts;
+    }
+
+    /**
+     * @return float
+     */
+    public function getCartTotal(): float
+    {
+        return $this->cartTotal;
+    }
+
+    /**
+     * @param float $cartTotal
+     */
+    public function setCartTotal(float $cartTotal): void
+    {
+        $this->cartTotal = $cartTotal;
     }
 }

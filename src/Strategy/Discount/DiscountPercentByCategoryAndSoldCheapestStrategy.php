@@ -25,14 +25,14 @@ class DiscountPercentByCategoryAndSoldCheapestStrategy implements DiscountStrate
             $jsonData = $discountDetail->getJsonData();
 
             $minBuyPrice = 0;
-            foreach ($dms->getOrderProducts() as $orderProduct) {
-                if ($orderProduct->getProduct()->getCategory()->getId() == $jsonData['categoryId'] &&
-                    $orderProduct->getQuantity() >= $jsonData['minBuyPiece']) {
+            foreach ($dms->getCartProducts() as $cartProduct) {
+                if ($cartProduct->getProduct()->getCategory()->getId() == $jsonData['categoryId'] &&
+                    $cartProduct->getQuantity() >= $jsonData['minBuyPiece']) {
 
                     if ($minBuyPrice == 0) { //Default en dusuk fiyatin belirlenmesi
-                        $minBuyPrice = $orderProduct->getUnitPrice();
-                    } else if ($minBuyPrice > $orderProduct->getUnitPrice()) { //En dusuk fiyatin bulunmasi
-                        $minBuyPrice = $orderProduct->getUnitPrice();
+                        $minBuyPrice = $cartProduct->getUnitPrice();
+                    } else if ($minBuyPrice > $cartProduct->getUnitPrice()) { //En dusuk fiyatin bulunmasi
+                        $minBuyPrice = $cartProduct->getUnitPrice();
                     }
                 }
             }

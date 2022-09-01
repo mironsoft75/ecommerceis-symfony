@@ -18,7 +18,7 @@ class AppFixtures extends Fixture implements DependentFixtureInterface
             CustomerFixtures::class,
             CategoryFixtures::class,
             ProductFixtures::class,
-            OrderFixtures::class,
+            CartFixtures::class,
             DiscountFixtures::class
         ];
     }

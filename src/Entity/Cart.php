@@ -2,14 +2,14 @@
 
 namespace App\Entity;
 
-use App\Repository\OrderRepository;
+use App\Repository\CartRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
- * @ORM\Entity(repositoryClass=OrderRepository::class)
+ * @ORM\Entity(repositoryClass=CartRepository::class)
  * @ORM\Table(name="carts")
  */
 class Cart
@@ -29,22 +29,21 @@ class Cart
     private float $total;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Customer::class, inversedBy="orders")
+     * @ORM\ManyToOne(targetEntity=Customer::class, inversedBy="carts")
      * @ORM\JoinColumn(nullable=false)
      * @Groups({"cart"})
      */
     private Customer $customer;
 
     /**
-     * @ORM\OneToMany(targetEntity=OrderProduct::class, mappedBy="order")
+     * @ORM\OneToMany(targetEntity=CartProduct::class, mappedBy="cart")
      * @Groups({"cartCartProductRelation"})
      */
-    private Collection $orderProducts;
-
+    private Collection $cartProducts;
 
     public function __construct()
     {
-        $this->orderProducts = new ArrayCollection();
+        $this->cartProducts = new ArrayCollection();
     }
 
     /**
@@ -94,10 +93,18 @@ class Cart
     }
 
     /**
-     * @return Collection<int, OrderProduct>
+     * @return Collection
      */
-    public function getOrderProducts(): Collection
+    public function getCartProducts(): Collection
     {
-        return $this->orderProducts;
+        return $this->cartProducts;
+    }
+
+    /**
+     * @param Collection $cartProducts
+     */
+    public function setCartProducts(Collection $cartProducts): void
+    {
+        $this->cartProducts = $cartProducts;
     }
 }

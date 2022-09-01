@@ -8,6 +8,9 @@ use Exception;
 
 class CustomerService extends BaseService
 {
+    /**
+     * @param CustomerRepository $repository
+     */
     public function __construct(CustomerRepository $repository)
     {
         $this->repository = $repository;

@@ -2,16 +2,16 @@
 
 namespace App\FormRequest;
 
-use App\Entity\OrderProduct;
+use App\Entity\CartProduct;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Validator as AcmeAssert;
 
-class OrderProductUpdateRequest extends BaseRequest
+class CartProductUpdateRequest extends BaseRequest
 {
     public function getRules(): Assert\Collection
     {
-        new AcmeAssert\TableRecordExists(OrderProduct::class, [
-            'id' => $this->getRouteParam('orderProductId')
+        new AcmeAssert\TableRecordExists(CartProduct::class, [
+            'id' => $this->getRouteParam('cartProductId')
         ]);
 
         return new Assert\Collection([

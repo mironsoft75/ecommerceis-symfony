@@ -2,14 +2,14 @@
 
 namespace App\Entity;
 
-use App\Repository\OrderProductRepository;
+use App\Repository\CartProductRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @ORM\Entity(repositoryClass=OrderProductRepository::class)
- * @ORM\Table(name="order_product")
+ * @ORM\Entity(repositoryClass=CartProductRepository::class)
+ * @ORM\Table(name="cart_product")
  */
 class CartProduct
 {
@@ -36,7 +36,7 @@ class CartProduct
      *     message="The value {{ value }} is not a valid {{ type }}."
      * )
      */
-    private Cart $order;
+    private Cart $cart;
 
     /**
      * @ORM\ManyToOne (targetEntity=Product::class, inversedBy="cartProducts")
@@ -78,15 +78,15 @@ class CartProduct
      */
     public function getCart(): Cart
     {
-        return $this->order;
+        return $this->cart;
     }
 
     /**
-     * @param Cart $order
+     * @param Cart $cart
      */
-    public function setCart(Cart $order): void
+    public function setCart(Cart $cart): void
     {
-        $this->order = $order;
+        $this->cart = $cart;
     }
 
     /**
