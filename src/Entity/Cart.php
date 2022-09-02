@@ -36,7 +36,7 @@ class Cart
     private Customer $customer;
 
     /**
-     * @ORM\OneToMany(targetEntity=CartProduct::class, mappedBy="cart")
+     * @ORM\OneToMany(targetEntity=CartProduct::class, mappedBy="cart", cascade={"remove"})
      * @Groups({"cartCartProductRelation"})
      */
     private Collection $cartProducts;
