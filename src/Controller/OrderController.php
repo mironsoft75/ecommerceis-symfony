@@ -31,4 +31,16 @@ class OrderController extends AbstractController
     {
         return ResponseHelper::success($this->orderService->index());
     }
+
+    /**
+     * Siparisi kaydini tamamlar
+     * @Route ("/complete", name="order_complete", methods={"GET"})
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function complete(): JsonResponse
+    {
+        $this->orderService->complete();
+        return ResponseHelper::success();
+    }
 }

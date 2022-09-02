@@ -3,7 +3,6 @@
 namespace App\Service;
 
 use App\Entity\Order;
-use App\Entity\OrderProduct;
 use App\Repository\OrderRepository;
 use Exception;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -11,14 +10,24 @@ use Symfony\Component\Serializer\SerializerInterface;
 class OrderService extends BaseService
 {
     private CustomerService $customerService;
+    private OrderProductService $orderProductService;
+    private ?Order $order;
+    private CartService $cartService;
 
+    /**
+     * @throws Exception
+     */
     public function __construct(OrderRepository $repository, SerializerInterface $serializer,
-                                CustomerService $customerService)
+                                CustomerService $customerService, OrderProductService $orderProductService,
+                                CartService     $cartService)
     {
         $this->repository = $repository;
         $this->serializer = $serializer;
         $this->customerService = $customerService;
+        $this->orderProductService = $orderProductService;
+        $this->cartService = $cartService;
         $this->em = $this->repository->getEntityManager();
+        $this->order = $this->getOrder(['customer' => $this->customerService->getCustomerTest()], null, false);
     }
 
     /**
@@ -64,26 +73,34 @@ class OrderService extends BaseService
      */
     public function getDefaultOrder(): Order
     {
-        $firstOrder = $this->repository->getDefaultOrder();
-        if (is_null($firstOrder)) {
-            return $this->store([
+        if (is_null($this->order)) {
+            $this->order = $this->store([
                 'total' => 0,
                 'customer' => $this->customerService->getCustomerTest()
             ]);
         }
-        return $firstOrder;
+        return $this->order;
     }
 
     /**
-     * Siparişe ürün eklendiğinde, ürün bilgisine göre sipariş totalinin artırır.
-     * @param OrderProduct $orderProduct
+     * Siparisi kaydini tamamlar
      * @return void
+     * @throws Exception
      */
-    public function updateOrderTotalByAddOrderProduct(OrderProduct $orderProduct): void
+    public function complete()
     {
-        $order = $orderProduct->getOrder();
-        $this->update($order, [
-            'total' => ($order->getTotal() + $orderProduct->getTotal())
-        ]);
+        $this->em->transactional(function () {
+            $cart = $this->cartService->getDefaultCart();
+            $order = $this->getDefaultOrder();
+            $this->update($cart, [
+                'total' => $cart->getTotal()
+            ]);
+
+            foreach ($cart->getCartProducts() as $cartProduct) {
+                $this->orderProductService->addCartProductToOrderProduct($order, $cartProduct);
+            }
+
+            $this->cartService->remove($cart);
+        });
     }
 }

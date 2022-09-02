@@ -20,14 +20,4 @@ class OrderRepository extends BaseRepository
     {
         parent::__construct($registry, Order::class);
     }
-
-    /**
-     * @return Order|null
-     */
-    public function getDefaultOrder(): ?Order
-    {
-        return $this->findOneBy([
-            'customer' => getCustomerId()
-        ]);
-    }
 }

@@ -4,7 +4,6 @@ namespace App\Service;
 
 use App\Entity\Cart;
 use App\Entity\CartProduct;
-use App\Entity\Order;
 use App\Repository\CartRepository;
 use Exception;
 use ReflectionException;
@@ -15,7 +14,11 @@ class CartService extends BaseService
     private ProductService $productService;
     private CustomerService $customerService;
     private DiscountService $discountService;
+    private ?Cart $cart;
 
+    /**
+     * @throws Exception
+     */
     public function __construct(CartRepository  $repository, SerializerInterface $serializer,
                                 ProductService  $productService, CustomerService $customerService,
                                 DiscountService $discountService)
@@ -26,18 +29,18 @@ class CartService extends BaseService
         $this->productService = $productService;
         $this->customerService = $customerService;
         $this->discountService = $discountService;
-
         $this->em = $this->repository->getEntityManager();
+        $this->cart = $this->getCart(['customer' => $this->customerService->getCustomerTest()], null, false);
     }
 
     /**
      * @param array $criteria
      * @param array|null $orderBy
      * @param bool $notFoundException
-     * @return Order|null
+     * @return Cart|null
      * @throws Exception
      */
-    public function getCart(array $criteria, array $orderBy = null, bool $notFoundException = true): ?Order
+    public function getCart(array $criteria, array $orderBy = null, bool $notFoundException = true): ?Cart
     {
         return $this->findOneBy($criteria, $orderBy, $notFoundException);
     }
@@ -47,7 +50,7 @@ class CartService extends BaseService
      * @param array|null $orderBy
      * @param $limit
      * @param $offset
-     * @return Order[]
+     * @return Cart[]
      */
     public function getCartBy(array $criteria, array $orderBy = null, $limit = null, $offset = null): array
     {
@@ -83,14 +86,13 @@ class CartService extends BaseService
      */
     public function getDefaultCart(): Cart
     {
-        $firstOrder = $this->repository->getDefaultCart();
-        if (is_null($firstOrder)) {
-            return $this->store([
+        if (is_null($this->cart)) {
+            $this->cart = $this->store([
                 'total' => 0,
                 'customer' => $this->customerService->getCustomerTest()
             ]);
         }
-        return $firstOrder;
+        return $this->cart;
     }
 
     /**

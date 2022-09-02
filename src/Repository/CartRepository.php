@@ -20,14 +20,4 @@ class CartRepository extends BaseRepository
     {
         parent::__construct($registry, Cart::class);
     }
-
-    /**
-     * @return Cart|null
-     */
-    public function getDefaultCart(): ?Cart
-    {
-        return $this->findOneBy([
-            'customer' => getCustomerId()
-        ]);
-    }
 }

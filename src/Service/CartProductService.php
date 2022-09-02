@@ -33,6 +33,18 @@ class CartProductService extends BaseService
     }
 
     /**
+     * @param array $criteria
+     * @param array|null $orderBy
+     * @param $limit
+     * @param $offset
+     * @return CartProduct[]
+     */
+    public function getCartProductBy(array $criteria, array $orderBy = null, $limit = null, $offset = null): array
+    {
+        return $this->repository->findBy($criteria, $orderBy, $limit, $offset);
+    }
+
+    /**
      * @param int $productId
      * @return CartProduct|null
      * @throws Exception
@@ -44,18 +56,6 @@ class CartProductService extends BaseService
             'cart' => $cart->getId(),
             'product' => $productId
         ], null, false);
-    }
-
-    /**
-     * @param array $criteria
-     * @param array|null $orderBy
-     * @param $limit
-     * @param $offset
-     * @return CartProduct[]
-     */
-    public function getCartProductBy(array $criteria, array $orderBy = null, $limit = null, $offset = null): array
-    {
-        return $this->repository->findBy($criteria, $orderBy, $limit, $offset);
     }
 
     /**

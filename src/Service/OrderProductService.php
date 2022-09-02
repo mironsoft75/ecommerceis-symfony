@@ -2,21 +2,20 @@
 
 namespace App\Service;
 
+use App\Entity\CartProduct;
+use App\Entity\Order;
 use App\Entity\OrderProduct;
-use App\Entity\Product;
 use App\Repository\OrderProductRepository;
 use Exception;
 
 class OrderProductService extends BaseService
 {
-    private OrderService $orderService;
-    private ProductService $productService;
-
-    public function __construct(OrderProductRepository $repository, OrderService $orderService, ProductService $productService)
+    /**
+     * @throws Exception
+     */
+    public function __construct(OrderProductRepository $repository)
     {
         $this->repository = $repository;
-        $this->orderService = $orderService;
-        $this->productService = $productService;
         $this->em = $this->repository->getEntityManager();
     }
 
@@ -33,20 +32,6 @@ class OrderProductService extends BaseService
     }
 
     /**
-     * @param int $productId
-     * @return OrderProduct|null
-     * @throws Exception
-     */
-    public function getOrderProductByOrderIdAndProductId(int $productId): ?OrderProduct
-    {
-        $order = $this->orderService->getDefaultOrder();
-        return $this->getOrderProduct([
-            'order' => $order->getId(),
-            'product' => $productId
-        ], null, false);
-    }
-
-    /**
      * @param array $criteria
      * @param array|null $orderBy
      * @param $limit
@@ -59,90 +44,19 @@ class OrderProductService extends BaseService
     }
 
     /**
-     * Siparişe ürünü ekler
-     * @param array $attributes
+     * Cart bilgilerini Order Product ekler
+     * @param Order $order
+     * @param CartProduct $cartProduct
      * @return void
      */
-    public function storeOrderProduct(array $attributes): void
+    public function addCartProductToOrderProduct(Order $order, CartProduct $cartProduct)
     {
-        $this->em->transactional(function () use ($attributes) {
-            $orderProduct = $this->getOrderProductByOrderIdAndProductId($attributes['product_id']); //OrderProduct'ı orderId ve productId göre çekilmesi.
-            if (is_null($orderProduct)) { //Aynı ürün daha önceden eklenmediyse ekleme yapılır.
-                $product = $this->productService->getProduct(['id' => $attributes['product_id']]); // ürün mevcut mu ?
-                $this->productService->checkStockQuantityByProduct($product, $attributes['quantity']); //ürünün stoğu var mı ?
-
-                $orderProduct = $this->addOrderProduct($product, $attributes['quantity']); //ürünü siparişe kaydet
-                $this->orderService->updateOrderTotalByAddOrderProduct($orderProduct); //eklemeye göre sipariş totalini günceller.
-            } else { //ürün daha önce eklenmiş ve tekrar aynı ürünü ekleme yaptığı için adet güncellemesi yapılır.
-                $attributes["quantity"] = $orderProduct->getQuantity() + $attributes["quantity"];
-                $this->updateOrderProductPart($attributes, $orderProduct); //güncelleme için gerekli işlemler yapılır.
-            }
-        });
-    }
-
-    /**
-     * Siparişteki ürünü günceller
-     * @param int $orderProductId
-     * @param array $attributes
-     * @return void
-     * @throws Exception
-     */
-    public function updateOrderProduct(array $attributes, int $orderProductId): void
-    {
-        $this->em->transactional(function () use ($attributes, $orderProductId) {
-            $orderProduct = $this->getOrderProduct(['id' => $orderProductId]); // OrderProduct mevcut mu ?
-            $this->updateOrderProductPart($attributes, $orderProduct); //OrderProduct mevcutsa güncelleme yapılır
-        });
-    }
-
-    /**
-     * Siparişe ait ürün ile ilgili güncelleme işlemlerini gerçekleştirir.
-     * @param array $attributes
-     * @param OrderProduct $orderProduct
-     * @return void
-     * @throws Exception
-     */
-    public function updateOrderProductPart(array $attributes, OrderProduct $orderProduct): void
-    {
-        $product = $orderProduct->getProduct(); //ürün bilgiler ulaş
-        $this->productService->checkStockQuantityByProduct($product, $attributes['quantity']); //ürün stoğunu kontrol et.
-
-        $this->orderService->updateOrderTotalByUpdateOrderProduct($orderProduct, $attributes['quantity']); //sipariş total inde önceki kayıttaki ürün totalini çıkar ve yeni ürün totalini güncelle.
-        $this->update($orderProduct, [ //OrderProduct bilgilerini güncellenen ürün bilgilerine göre güncelle.
-            'quantity' => $attributes['quantity'],
-            'unitPrice' => $product->getPrice(),
-            'total' => $this->productService->getTotalQuantityPriceByProduct($product, $attributes['quantity'])
-        ]);
-    }
-
-    /**
-     * Siparişten ürünü kaldırır.
-     * @param $orderProductId
-     * @return void
-     */
-    public function destroyOrderProduct($orderProductId)
-    {
-        $this->em->transactional(function () use ($orderProductId) {
-            $orderProduct = $this->getOrderProduct(['id' => $orderProductId]); //OrderProduct mevcut mu
-            $this->orderService->updateOrderTotalByDestroyOrderProduct($orderProduct); //Sipariş totalinden silinecek olan OrderProduct totalini düşür.
-            $this->remove($orderProduct); //OrderProduct'dı sil
-        });
-    }
-
-    /**
-     * @param Product $product
-     * @param int $quantity
-     * @return OrderProduct
-     * @throws Exception
-     */
-    public function addOrderProduct(Product $product, int $quantity): OrderProduct
-    {
-        return $this->store([
-            'order' => $this->orderService->getDefaultOrder(),
-            'product' => $product,
-            'quantity' => $quantity,
-            'unitPrice' => $product->getPrice(),
-            'total' => $this->productService->getTotalQuantityPriceByProduct($product, $quantity)
+        $this->store([
+            'order' => $order,
+            'product' => $cartProduct->getProduct(),
+            'quantity' => $cartProduct->getQuantity(),
+            'unitPrice' => $cartProduct->getUnitPrice(),
+            'total' => $cartProduct->getTotal()
         ]);
     }
 }
