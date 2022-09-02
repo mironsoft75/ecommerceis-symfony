@@ -22,8 +22,6 @@ class DiscountManagerStrategy
     private Collection $cartProducts;
     private array $discountMessages = [];
     private float $cartTotal; //Siparis toplami
-    private float $discountedTotal; //Siparişten indirim düştükten sonra kalan fiyat
-    private float $totalDiscount = 0; //Siparişten düşülen toplam indirim
     private array $discountTypes; //Hangi indirim yöntemi ile düşüş yapıldığının bilgisini almak için
 
     /**
@@ -39,7 +37,6 @@ class DiscountManagerStrategy
         $this->setCart($this->getCartService()->getDefaultCart());
         $this->setCartProducts($this->getCart()->getCartProducts());
         $this->setCartTotal($this->getCart()->getTotal());
-        $this->setDiscountedTotal($this->getCart()->getTotal());
         $this->setDiscountTypes(ArrayHelper::getReflactionClassWithFlip(DiscountType::class));
     }
 
@@ -68,34 +65,23 @@ class DiscountManagerStrategy
         return [
             'cart_id' => $this->getCart()->getId(),
             'discount' => $this->getDiscountMessages(),
-            "totalDiscount" => $this->getTotalDiscount(),
-            "discountedTotal" => $this->getDiscountedTotal(),
             "total" => $this->getCartTotal()
         ];
     }
 
     /**
+     * @param int $discountId
      * @param string $discountReason
      * @param float $discountAmount
      * @return void
      */
-    public function addDiscountMessage(string $discountReason, float $discountAmount)
+    public function addDiscountMessage(int $discountId, string $discountReason, float $discountAmount)
     {
-        $this->discountMessages[] = [
+        $this->discountMessages[$discountId] = [
             "discountReason" => $discountReason,
             "discountAmount" => $discountAmount,
-            "subtotal" => $this->getDiscountedTotal()
+            "subtotal" => round($this->getCartTotal() - $discountAmount, 2) //toplam fiyattan indirimin dusulmesi
         ];
-    }
-
-    /**
-     * @param float $discountAmount
-     * @return void
-     */
-    public function calculateDiscountedTotalAndTotalDiscountByDiscountAmount(float $discountAmount)
-    {
-        $this->setDiscountedTotal(round($this->getDiscountedTotal() - $discountAmount, 2)); //Toplam fiyattan düşüş
-        $this->setTotalDiscount(round($this->getTotalDiscount() + $discountAmount, 2)); //İndirim toplamı arttırma
     }
 
     /**
@@ -128,38 +114,6 @@ class DiscountManagerStrategy
     public function setDiscountMessages(array $discountMessages): void
     {
         $this->discountMessages = $discountMessages;
-    }
-
-    /**
-     * @return float
-     */
-    public function getDiscountedTotal(): float
-    {
-        return $this->discountedTotal;
-    }
-
-    /**
-     * @param float $discountedTotal
-     */
-    public function setDiscountedTotal(float $discountedTotal): void
-    {
-        $this->discountedTotal = $discountedTotal;
-    }
-
-    /**
-     * @return float
-     */
-    public function getTotalDiscount(): float
-    {
-        return $this->totalDiscount;
-    }
-
-    /**
-     * @param float $totalDiscount
-     */
-    public function setTotalDiscount(float $totalDiscount): void
-    {
-        $this->totalDiscount = $totalDiscount;
     }
 
     /**

@@ -13,9 +13,19 @@ use ReflectionException;
 
 class DiscountService extends BaseService
 {
-    public function __construct(DiscountRepository $repository)
+    /**
+     * @var CartService
+     */
+    private CartService $cartService;
+
+    /**
+     * @param DiscountRepository $repository
+     * @param CartService $cartService
+     */
+    public function __construct(DiscountRepository $repository, CartService $cartService)
     {
         $this->repository = $repository;
+        $this->cartService = $cartService;
     }
 
     /**
@@ -43,11 +53,11 @@ class DiscountService extends BaseService
     }
 
     /**
-     * @param CartService $cartService
+     * Indirimleri hesaplar
      * @return array
      * @throws ReflectionException
      */
-    public function getDiscountAnalysis(CartService $cartService): array
+    public function cartDiscountAnalysis(): array
     {
         $strategies = [
             new DiscountPercentOverPriceStrategy(), //Belirlenen sipariş toplam sayısına göre X% indirim eklenmesi.
@@ -55,12 +65,29 @@ class DiscountService extends BaseService
             new DiscountPercentByCategoryAndSoldCheapestStrategy() //Belirli kategori ve satış adetine göre en ucuz üründen belirlenen yüzde kadar indirim yapılır.
         ];
 
-        $discountManagerStrategy = new DiscountManagerStrategy($cartService, $this);
+        $discountManagerStrategy = new DiscountManagerStrategy($this->cartService, $this);
         foreach ($strategies as $strategy) {
             $discountManagerStrategy->setStrategy($strategy);
             $discountManagerStrategy->runAlgorithm();
         }
 
         return $discountManagerStrategy->getAnalysisResult();
+    }
+
+    /**
+     * @param $discountId
+     * @return array
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function getDiscountAnalysisWithDiscount($discountId): array
+    {
+        if (!isset($this->cartDiscountAnalysis()['discount'][$discountId])) {
+            throw new Exception('Discount Analysis Not Found');
+        }
+        return [
+            'discount' => $this->getDiscount(['id' => $discountId]),
+            'discountAnalysis' => $this->cartDiscountAnalysis()['discount'][$discountId]
+        ];
     }
 }

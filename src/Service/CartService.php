@@ -13,22 +13,19 @@ class CartService extends BaseService
 {
     private ProductService $productService;
     private CustomerService $customerService;
-    private DiscountService $discountService;
     private ?Cart $cart;
 
     /**
      * @throws Exception
      */
-    public function __construct(CartRepository  $repository, SerializerInterface $serializer,
-                                ProductService  $productService, CustomerService $customerService,
-                                DiscountService $discountService)
+    public function __construct(CartRepository $repository, SerializerInterface $serializer,
+                                ProductService $productService, CustomerService $customerService)
     {
         $this->repository = $repository;
         $this->serializer = $serializer;
 
         $this->productService = $productService;
         $this->customerService = $customerService;
-        $this->discountService = $discountService;
         $this->em = $this->repository->getEntityManager();
         $this->cart = $this->getCart(['customer' => $this->customerService->getCustomerTest()], null, false);
     }
@@ -67,16 +64,6 @@ class CartService extends BaseService
         return json_decode($this->serializer->serialize($this->getDefaultCart(), 'json', [
             'groups' => ['cart', 'cartCartProductRelation', 'cartProduct']
         ]));
-    }
-
-    /**
-     * Sepetdeki ürünlere göre indirimleri hesaplar
-     * @return array
-     * @throws ReflectionException
-     */
-    public function discount(): array
-    {
-        return $this->discountService->getDiscountAnalysis($this);
     }
 
     /**

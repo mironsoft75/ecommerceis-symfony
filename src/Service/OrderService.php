@@ -11,23 +11,23 @@ class OrderService extends BaseService
 {
     private CustomerService $customerService;
     private OrderProductService $orderProductService;
-    private ?Order $order;
     private CartService $cartService;
+    private DiscountService $discountService;
 
     /**
      * @throws Exception
      */
     public function __construct(OrderRepository $repository, SerializerInterface $serializer,
                                 CustomerService $customerService, OrderProductService $orderProductService,
-                                CartService     $cartService)
+                                CartService     $cartService, DiscountService $discountService)
     {
         $this->repository = $repository;
         $this->serializer = $serializer;
         $this->customerService = $customerService;
         $this->orderProductService = $orderProductService;
         $this->cartService = $cartService;
+        $this->discountService = $discountService;
         $this->em = $this->repository->getEntityManager();
-        $this->order = $this->getOrder(['customer' => $this->customerService->getCustomerTest()], null, false);
     }
 
     /**
@@ -61,39 +61,32 @@ class OrderService extends BaseService
      */
     public function index()
     {
-        return json_decode($this->serializer->serialize($this->getDefaultOrder(), 'json', [
+        return json_decode($this->serializer->serialize($this->repository->findAll(), 'json', [
             'groups' => ['order', 'orderOrderProductRelation', 'orderProduct']
         ]));
     }
 
     /**
-     * Müşteriye ait default sipariş kaydını döner.
-     * @return Order
-     * @throws Exception
-     */
-    public function getDefaultOrder(): Order
-    {
-        if (is_null($this->order)) {
-            $this->order = $this->store([
-                'total' => 0,
-                'customer' => $this->customerService->getCustomerTest()
-            ]);
-        }
-        return $this->order;
-    }
-
-    /**
      * Siparisi kaydini tamamlar
+     * @param array $attributes
      * @return void
-     * @throws Exception
      */
-    public function complete()
+    public function complete(array $attributes)
     {
-        $this->em->transactional(function () {
+        $this->em->transactional(function () use ($attributes) {
             $cart = $this->cartService->getDefaultCart();
-            $order = $this->getDefaultOrder();
-            $this->update($cart, [
-                'total' => $cart->getTotal()
+
+            $total = $cart->getTotal();
+            if (isset($attributes['discount_id'])) { //Indirim mevcut mu ?
+                $discountAnalysisWithDiscount = $this->discountService->getDiscountAnalysisWithDiscount($attributes['discount_id']);
+                //$discountAnalysisWithDiscount['discount']
+                $total = $discountAnalysisWithDiscount['discountAnalysis']['subtotal'];
+            }
+
+            //Yeni siparis acilarak sepetin aktarilmasi
+            $order = $this->store([
+                'total' => $total,
+                'customer' => $this->customerService->getCustomerTest()
             ]);
 
             foreach ($cart->getCartProducts() as $cartProduct) {

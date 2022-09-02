@@ -25,8 +25,7 @@ class DiscountPercentOverPriceStrategy implements DiscountStrategyInterface
             $jsonData = $discountDetail->getJsonData();
             if ($dms->getCartTotal() >= $jsonData['overPrice']) {
                 $discountAmount = CalculationHelper::calculatePercent($dms->getCartTotal(), $jsonData['percent']); //Totalden yüzde alımı
-                $dms->calculateDiscountedTotalAndTotalDiscountByDiscountAmount($discountAmount);
-                $dms->addDiscountMessage($dms->getDiscountTypes()[DiscountType::PERCENT_OVER_PRICE], $discountAmount);
+                $dms->addDiscountMessage($discountDetail->getId(), $dms->getDiscountTypes()[DiscountType::PERCENT_OVER_PRICE], $discountAmount);
             }
         }
     }

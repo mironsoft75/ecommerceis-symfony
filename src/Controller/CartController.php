@@ -18,6 +18,9 @@ class CartController extends AbstractController
 {
     private CartService $cartService;
 
+    /**
+     * @param CartService $cartService
+     */
     public function __construct(CartService $cartService)
     {
         $this->cartService = $cartService;
@@ -32,16 +35,5 @@ class CartController extends AbstractController
     public function index(): JsonResponse
     {
         return ResponseHelper::success($this->cartService->index());
-    }
-
-    /**
-     * Sepetdeki ürünlere göre indirimleri hesaplar
-     * @Route ("/discount", name="cart_discount", methods={"GET"})
-     * @return JsonResponse
-     * @throws ReflectionException
-     */
-    public function discount(): JsonResponse
-    {
-        return ResponseHelper::success($this->cartService->discount());
     }
 }

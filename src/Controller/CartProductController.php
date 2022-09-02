@@ -16,8 +16,14 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class CartProductController extends AbstractController
 {
+    /**
+     * @var CartProductService
+     */
     private CartProductService $cartProductService;
 
+    /**
+     * @param CartProductService $cartProductService
+     */
     public function __construct(CartProductService $cartProductService)
     {
         $this->cartProductService = $cartProductService;

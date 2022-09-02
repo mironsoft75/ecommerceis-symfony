@@ -39,8 +39,7 @@ class DiscountPercentByCategoryAndSoldCheapestStrategy implements DiscountStrate
 
             if ($minBuyPrice != 0) {
                 $discountAmount = round(CalculationHelper::calculatePercent($minBuyPrice, $jsonData['percent']), 2);
-                $dms->calculateDiscountedTotalAndTotalDiscountByDiscountAmount($discountAmount);
-                $dms->addDiscountMessage($dms->getDiscountTypes()[DiscountType::PERCENT_CATEGORY_SOLD_CHEAPEST], $discountAmount);
+                $dms->addDiscountMessage($discountDetail->getId(), $dms->getDiscountTypes()[DiscountType::PERCENT_CATEGORY_SOLD_CHEAPEST], $discountAmount);
             }
         }
     }

@@ -11,8 +11,14 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class OrderProductController extends AbstractController
 {
+    /**
+     * @var OrderProductService
+     */
     private OrderProductService $orderProductService;
 
+    /**
+     * @param OrderProductService $orderProductService
+     */
     public function __construct(OrderProductService $orderProductService)
     {
         $this->orderProductService = $orderProductService;

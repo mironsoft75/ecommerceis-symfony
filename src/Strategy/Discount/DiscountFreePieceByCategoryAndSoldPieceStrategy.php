@@ -28,8 +28,7 @@ class DiscountFreePieceByCategoryAndSoldPieceStrategy implements DiscountStrateg
                     && $cartProduct->getQuantity() == $jsonData['buyPiece']) {
 
                     $discountAmount = round($cartProduct->getUnitPrice() * $jsonData['freePiece'], 2);
-                    $dms->calculateDiscountedTotalAndTotalDiscountByDiscountAmount($discountAmount);
-                    $dms->addDiscountMessage($dms->getDiscountTypes()[DiscountType::FREE_PIECE_BY_CATEGORY_AND_SOLD_PIECE], $discountAmount);
+                    $dms->addDiscountMessage($discountDetail->getId(), $dms->getDiscountTypes()[DiscountType::FREE_PIECE_BY_CATEGORY_AND_SOLD_PIECE], $discountAmount);
                     break;
                 }
             }

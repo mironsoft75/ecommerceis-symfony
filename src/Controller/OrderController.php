@@ -2,11 +2,13 @@
 
 namespace App\Controller;
 
+use App\Helper\RequestHelper;
 use App\Helper\ResponseHelper;
 use App\Service\OrderService;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -14,8 +16,14 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class OrderController extends AbstractController
 {
+    /**
+     * @var OrderService
+     */
     private OrderService $orderService;
 
+    /**
+     * @param OrderService $orderService
+     */
     public function __construct(OrderService $orderService)
     {
         $this->orderService = $orderService;
@@ -35,12 +43,13 @@ class OrderController extends AbstractController
     /**
      * Siparisi kaydini tamamlar
      * @Route ("/complete", name="order_complete", methods={"GET"})
+     * @param Request $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function complete(): JsonResponse
+    public function complete(Request $request): JsonResponse
     {
-        $this->orderService->complete();
+        $this->orderService->complete(RequestHelper::getJson($request));
         return ResponseHelper::success();
     }
 }
