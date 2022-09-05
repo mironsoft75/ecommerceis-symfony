@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\DiscountRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=DiscountRepository::class)
@@ -15,31 +16,37 @@ class Discount
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
      * @ORM\Column(type="integer")
+     * @Groups({"discount"})
      */
     private int $id;
 
     /**
      * @ORM\Column(type="integer")
+     * @Groups({"discount"})
      */
     private int $type;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"discount"})
      */
     private string $name;
 
     /**
      * @ORM\Column(type="string", length=2500, nullable=true)
+     * @Groups({"discount"})
      */
     private ?string $description;
 
     /**
      * @ORM\Column(type="boolean")
+     * @Groups({"discount"})
      */
     private bool $status;
 
     /**
      * @ORM\Column(type="text")
+     * @Groups({"discount"})
      */
     private string $jsonData;
 
@@ -118,11 +125,12 @@ class Discount
     }
 
     /**
-     * @return array
+     * @param bool $jsonDecode
+     * @return array|string
      */
-    public function getJsonData(): array
+    public function getJsonData(bool $jsonDecode = true)
     {
-        return json_decode($this->jsonData, true);
+        return $jsonDecode ? json_decode($this->jsonData, true) : $this->jsonData;
     }
 
     /**
