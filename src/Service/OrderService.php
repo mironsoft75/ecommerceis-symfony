@@ -91,7 +91,7 @@ class OrderService extends BaseService
 
             //Yeni siparis acilmasi sepet bilgilerine gore acilmasi
             $order = $this->store([
-                'subtotal' => $subTotal ?? 0,
+                'subtotal' => $subTotal ?? $cart->getTotal(),
                 'total' => $cart->getTotal(),
                 'customer' => $this->customerService->getCustomerTest()
             ]);

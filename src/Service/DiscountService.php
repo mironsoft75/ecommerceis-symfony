@@ -82,12 +82,14 @@ class DiscountService extends BaseService
      */
     public function getDiscountAnalysisWithDiscount($discountId): array
     {
-        if (!isset($this->cartDiscountAnalysis()['discount'][$discountId])) {
+        $cartDiscountAnalysis = $this->cartDiscountAnalysis()['discount'][$discountId];
+        if (!isset($cartDiscountAnalysis)) {
             throw new Exception('Discount Analysis Not Found');
         }
+
         return [
             'discount' => $this->getDiscount(['id' => $discountId]),
-            'discountAnalysis' => $this->cartDiscountAnalysis()['discount'][$discountId]
+            'discountAnalysis' => $cartDiscountAnalysis
         ];
     }
 }
