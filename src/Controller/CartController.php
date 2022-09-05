@@ -4,9 +4,7 @@ namespace App\Controller;
 
 use App\Helper\ResponseHelper;
 use App\Service\CartService;
-use App\Service\OrderService;
 use Exception;
-use ReflectionException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
