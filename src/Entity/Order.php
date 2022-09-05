@@ -26,6 +26,12 @@ class Order
      * @ORM\Column(type="decimal", precision=13, scale=2, options={"default" : 0})
      * @Groups({"order"})
      */
+    private float $subTotal;
+
+    /**
+     * @ORM\Column(type="decimal", precision=13, scale=2, options={"default" : 0})
+     * @Groups({"order"})
+     */
     private float $total;
 
     /**
@@ -41,10 +47,16 @@ class Order
      */
     private Collection $orderProducts;
 
+    /**
+     * @ORM\OneToMany(targetEntity=OrderDiscountHistory::class, mappedBy="order")
+     * @Groups({"orderOrderDiscountHistoryRelation"})
+     */
+    private Collection $orderDiscountHistory;
 
     public function __construct()
     {
         $this->orderProducts = new ArrayCollection();
+        $this->orderDiscountHistory = new ArrayCollection();
     }
 
     /**
@@ -53,6 +65,22 @@ class Order
     public function getId(): int
     {
         return $this->id;
+    }
+
+    /**
+     * @return float
+     */
+    public function getSubTotal(): float
+    {
+        return $this->subTotal;
+    }
+
+    /**
+     * @param float $subTotal
+     */
+    public function setSubTotal(float $subTotal): void
+    {
+        $this->subTotal = $subTotal;
     }
 
     /**
@@ -99,5 +127,21 @@ class Order
     public function getOrderProducts(): Collection
     {
         return $this->orderProducts;
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getOrderDiscountHistory(): Collection
+    {
+        return $this->orderDiscountHistory;
+    }
+
+    /**
+     * @param Collection $orderDiscountHistory
+     */
+    public function setOrderDiscountHistory(Collection $orderDiscountHistory): void
+    {
+        $this->orderDiscountHistory = $orderDiscountHistory;
     }
 }

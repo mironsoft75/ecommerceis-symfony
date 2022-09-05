@@ -13,13 +13,14 @@ class OrderService extends BaseService
     private OrderProductService $orderProductService;
     private CartService $cartService;
     private DiscountService $discountService;
+    private OrderDiscountHistoryService $orderDiscountHistoryService;
 
     /**
      * @throws Exception
      */
     public function __construct(OrderRepository $repository, SerializerInterface $serializer,
                                 CustomerService $customerService, OrderProductService $orderProductService,
-                                CartService     $cartService, DiscountService $discountService)
+                                CartService     $cartService, DiscountService $discountService, OrderDiscountHistoryService $orderDiscountHistoryService)
     {
         $this->repository = $repository;
         $this->serializer = $serializer;
@@ -27,6 +28,7 @@ class OrderService extends BaseService
         $this->orderProductService = $orderProductService;
         $this->cartService = $cartService;
         $this->discountService = $discountService;
+        $this->orderDiscountHistoryService = $orderDiscountHistoryService;
         $this->em = $this->repository->getEntityManager();
     }
 
@@ -62,7 +64,7 @@ class OrderService extends BaseService
     public function index()
     {
         return json_decode($this->serializer->serialize($this->repository->findAll(), 'json', [
-            'groups' => ['order', 'orderOrderProductRelation', 'orderProduct']
+            'groups' => ['order', 'orderOrderProductRelation', 'orderProduct', 'orderOrderDiscountHistoryRelation', 'orderDiscountHistory']
         ]));
     }
 
@@ -75,24 +77,40 @@ class OrderService extends BaseService
     {
         $this->em->transactional(function () use ($attributes) {
             $cart = $this->cartService->getDefaultCart();
+            $cartProducts = $cart->getCartProducts();
 
-            $total = $cart->getTotal();
-            if (isset($attributes['discount_id'])) { //Indirim mevcut mu ?
-                $discountAnalysisWithDiscount = $this->discountService->getDiscountAnalysisWithDiscount($attributes['discount_id']);
-                //$discountAnalysisWithDiscount['discount']
-                $total = $discountAnalysisWithDiscount['discountAnalysis']['subtotal'];
+            if (count($cartProducts) <= 0) { //sepette urun var mi ?
+                throw new Exception('Cart is empty');
             }
 
-            //Yeni siparis acilarak sepetin aktarilmasi
+            if (isset($attributes['discount_id'])) { //Indirim mevcut mu ?
+                $discountAnalysisWithDiscount = $this->discountService->getDiscountAnalysisWithDiscount($attributes['discount_id']); //secilen indirimin uygulanmasi
+                $discount = $discountAnalysisWithDiscount['discount']; //indirim bilgileri
+                $subTotal = $discountAnalysisWithDiscount['discountAnalysis']['subtotal']; //indirimli tutar bilgisi
+            }
+
+            //Yeni siparis acilmasi sepet bilgilerine gore acilmasi
             $order = $this->store([
-                'total' => $total,
+                'subtotal' => $subTotal ?? 0,
+                'total' => $cart->getTotal(),
                 'customer' => $this->customerService->getCustomerTest()
             ]);
 
-            foreach ($cart->getCartProducts() as $cartProduct) {
+            if (isset($discount)) { //Siparişe ait indirim geçmişinin tutulması
+                $this->orderDiscountHistoryService->store([
+                    'order' => $order,
+                    'name' => $discount->getName(),
+                    'description' => $discount->getDescription(),
+                    'jsonData' => $discount->getJsonData(false)
+                ]);
+            }
+
+            //Sepetteki urunlerin siparise aktarilmasi
+            foreach ($cartProducts as $cartProduct) {
                 $this->orderProductService->addCartProductToOrderProduct($order, $cartProduct);
             }
 
+            //Sepetin silinmesi
             $this->cartService->remove($cart);
         });
     }
