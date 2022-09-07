@@ -13,16 +13,19 @@ class CustomerFixtures extends Fixture
         $data = [
             [
                 "name" => "Türker Jöntürk",
+                "mail" => "muratcakmak5252@gmail.com",
                 "since" => "2014-06-28",
                 "revenue" => "492.12"
             ],
             [
                 "name" => "Kaptan Devopuz",
+                "mail" => "muratcakmak5252@gmail.com",
                 "since" => "2015-01-15",
                 "revenue" => "1505.95"
             ],
             [
                 "name" => "İsa Sonuyumaz",
+                "mail" => "muratcakmak5252@gmail.com",
                 "since" => "2016-02-11",
                 "revenue" => "0.00"
             ]
@@ -32,6 +35,7 @@ class CustomerFixtures extends Fixture
         foreach ($data as $item){
             $customer = new Customer();
             $customer->setName($item['name']);
+            $customer->setMail($item['mail']);
             $customer->setSince(new \DateTime($item['since']));
             $customer->setRevenue($item['revenue']);
             $manager->persist($customer);
