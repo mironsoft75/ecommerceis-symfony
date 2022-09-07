@@ -3,8 +3,10 @@
 namespace App\Service;
 
 use App\Entity\Order;
+use App\Message\OrderMailNotification;
 use App\Repository\OrderRepository;
 use Exception;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class OrderService extends BaseService
@@ -14,13 +16,15 @@ class OrderService extends BaseService
     private CartService $cartService;
     private DiscountService $discountService;
     private OrderDiscountHistoryService $orderDiscountHistoryService;
+    private MessageBusInterface $bus;
 
     /**
      * @throws Exception
      */
-    public function __construct(OrderRepository $repository, SerializerInterface $serializer,
-                                CustomerService $customerService, OrderProductService $orderProductService,
-                                CartService     $cartService, DiscountService $discountService, OrderDiscountHistoryService $orderDiscountHistoryService)
+    public function __construct(OrderRepository             $repository, SerializerInterface $serializer,
+                                CustomerService             $customerService, OrderProductService $orderProductService,
+                                CartService                 $cartService, DiscountService $discountService,
+                                OrderDiscountHistoryService $orderDiscountHistoryService, MessageBusInterface $bus)
     {
         $this->repository = $repository;
         $this->serializer = $serializer;
@@ -30,6 +34,7 @@ class OrderService extends BaseService
         $this->discountService = $discountService;
         $this->orderDiscountHistoryService = $orderDiscountHistoryService;
         $this->em = $this->repository->getEntityManager();
+        $this->bus = $bus;
     }
 
     /**
@@ -112,6 +117,18 @@ class OrderService extends BaseService
 
             //Sepetin silinmesi
             $this->cartService->remove($cart);
+
+            //Siparisin bilgilerinin mail oalrak gonderilmesi
+            $this->sendOrderMailNotification($order);
         });
+    }
+
+    /**
+     * @param Order $order
+     * @return void
+     */
+    public function sendOrderMailNotification(Order $order)
+    {
+        $this->bus->dispatch(new OrderMailNotification($order));
     }
 }
