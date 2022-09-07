@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20220905104335 extends AbstractMigration
+final class Version20220907134901 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -26,7 +26,7 @@ final class Version20220905104335 extends AbstractMigration
         $this->addSql('CREATE TABLE carts (id SERIAL NOT NULL, customer_id INT NOT NULL, total NUMERIC(13, 2) DEFAULT \'0\' NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_4E004AAC9395C3F3 ON carts (customer_id)');
         $this->addSql('CREATE TABLE categories (id SERIAL NOT NULL, name VARCHAR(255) NOT NULL, PRIMARY KEY(id))');
-        $this->addSql('CREATE TABLE customers (id SERIAL NOT NULL, name VARCHAR(255) NOT NULL, since DATE NOT NULL, revenue NUMERIC(13, 2) DEFAULT \'0\' NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE customers (id SERIAL NOT NULL, name VARCHAR(255) NOT NULL, mail VARCHAR(255) NOT NULL, since DATE NOT NULL, revenue NUMERIC(13, 2) DEFAULT \'0\' NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE TABLE discounts (id SERIAL NOT NULL, type INT NOT NULL, name VARCHAR(255) NOT NULL, description VARCHAR(2500) DEFAULT NULL, status BOOLEAN NOT NULL, json_data TEXT NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE TABLE order_discount_history (id SERIAL NOT NULL, order_id INT NOT NULL, name VARCHAR(255) NOT NULL, description VARCHAR(2500) DEFAULT NULL, json_data TEXT NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_F3A409468D9F6D38 ON order_discount_history (order_id)');
