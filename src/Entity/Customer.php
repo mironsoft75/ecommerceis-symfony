@@ -30,6 +30,12 @@ class Customer
     private string $name;
 
     /**
+     * @ORM\Column(type="string", length=255)
+     * @Groups({"customer"})
+     */
+    private string $mail;
+
+    /**
      * @ORM\Column(type="date")
      * @Groups({"customer"})
      */
@@ -84,6 +90,22 @@ class Customer
         $this->name = $name;
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMail(): string
+    {
+        return $this->mail;
+    }
+
+    /**
+     * @param string $mail
+     */
+    public function setMail(string $mail): void
+    {
+        $this->mail = $mail;
     }
 
     /**
