@@ -25,6 +25,12 @@ php bin/console doctrine:fixtures:load
 Veritabanını dummy data ile birlikte tekrar oluşturmak için
 ```
 php bin/console doctrine:migrations:migrate --seed
+
+VEYA
+
+php bin/console doctrine:migrations:migrate first
+php bin/console doctrine:migrations:migrate
+php bin/console doctrine:fixtures:load
 ```
 
 ## About
@@ -33,6 +39,12 @@ https://documenter.getpostman.com/view/22844490/VUqmvJvC
 
 ## Packages
 - RabbitMQ: `composer require amqp-messenger`
+- Mailer: `composer require symfony/mailer`
+
+### Start Queue
+```
+php bin/console messenger:consume async -vv
+```
 
 ### File Structure
 ```
@@ -55,6 +67,8 @@ https://documenter.getpostman.com/view/22844490/VUqmvJvC
 |   |   `-- Category.php
 |   |   `-- Order.php
 |   |   `-- ...
+|   |-- EventListener
+|   |   `-- OrderProductListener.php
 |   |-- EventSubscriber
 |   |   `-- ExceptionSubscriber.php
 |   |-- Helper
@@ -65,6 +79,10 @@ https://documenter.getpostman.com/view/22844490/VUqmvJvC
 |   |   |-- Discount
 |   |   |   `-- DiscountStrategyInterface.php
 |   |   |   `-- ...
+|   |-- Message
+|   |   `-- OrderMailNotification.php
+|   |-- MessageHandler
+|   |   `-- OrderMailNotificationHandler.php
 |   |-- Repository
 |   |   `-- BaseRepository.php
 |   |   `-- OrderRepository.php
