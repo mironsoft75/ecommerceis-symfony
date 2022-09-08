@@ -7,6 +7,28 @@
 	},
 	"item": [
 		{
+			"name": "Home",
+			"item": [
+				{
+					"name": "Index",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api-url}}/home",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"home"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Carts",
 			"item": [
 				{
@@ -230,14 +252,14 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "{{api-url}}/carts/cart-product/9",
+									"raw": "{{api-url}}/carts/cart-product/1",
 									"host": [
 										"{{api-url}}"
 									],
 									"path": [
 										"carts",
 										"cart-product",
-										"9"
+										"1"
 									]
 								}
 							},
