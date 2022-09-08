@@ -119,16 +119,16 @@ class OrderService extends BaseService
             $this->cartService->remove($cart);
 
             //Siparisin bilgilerinin mail oalrak gonderilmesi
-            $this->sendOrderMailNotification($order);
+            $this->sendOrderMailNotification($order->getId());
         });
     }
 
     /**
-     * @param Order $order
+     * @param int $orderId
      * @return void
      */
-    public function sendOrderMailNotification(Order $order)
+    public function sendOrderMailNotification(int $orderId)
     {
-        $this->bus->dispatch(new OrderMailNotification($order));
+        $this->bus->dispatch(new OrderMailNotification($orderId));
     }
 }

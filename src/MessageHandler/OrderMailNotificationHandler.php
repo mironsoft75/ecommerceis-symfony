@@ -3,8 +3,11 @@
 namespace App\MessageHandler;
 
 use App\Entity\Customer;
+use App\Entity\Order;
 use App\Entity\OrderProduct;
 use App\Message\OrderMailNotification;
+use App\Repository\OrderRepository;
+use App\Service\OrderService;
 use Doctrine\Common\Collections\Collection;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Mailer\MailerInterface;
@@ -15,24 +18,33 @@ class OrderMailNotificationHandler implements MessageHandlerInterface
 {
     private LoggerInterface $logger;
     private MailerInterface $mailer;
+    private OrderRepository $orderRepository;
 
-    public function __construct(LoggerInterface $logger, MailerInterface $mailer)
+    private Order $order;
+    private Customer $customer;
+
+    public function __construct(LoggerInterface $logger, MailerInterface $mailer, OrderRepository $orderRepository)
     {
         $this->logger = $logger;
         $this->mailer = $mailer;
+        $this->orderRepository = $orderRepository;
     }
 
     public function __invoke(OrderMailNotification $orderMailNotification)
     {
-        $contect = $this->prepareHtml($orderMailNotification->getOrderProducts());
-        $this->sendMail($orderMailNotification->getCustomer(), $contect);
+        $this->order = $this->orderRepository->findOneBy([
+            'id' => $orderMailNotification->getOrderId()
+        ]);
+        $this->customer = $this->order->getCustomer();
+
+        $this->sendMail();
     }
 
     /**
      * @param Collection<int, OrderProduct> $orderProducts
      * @return string
      */
-    public function prepareHtml(Collection $orderProducts): string
+    public function prepareHtml(): string
     {
         $html = '<table>';
         $html .= '<tr>';
@@ -43,7 +55,7 @@ class OrderMailNotificationHandler implements MessageHandlerInterface
             $html .= '<th>Toplam</th>';
         $html .= '</tr>';
         $html .= '<tbody>';
-        foreach ($orderProducts as $orderProduct){
+        foreach ($this->order->getOrderProducts() as $orderProduct){
             $html .= '<tr>';
                 $html .= '<td>'.$orderProduct->getProduct()->getName().'</td>';
                 $html .= '<td>'.$orderProduct->getQuantity().'</td>';
@@ -57,14 +69,14 @@ class OrderMailNotificationHandler implements MessageHandlerInterface
         return $html;
     }
 
-    public function sendMail(Customer $customer, string $content)
+    public function sendMail()
     {
         $email = (new Email())
             ->from('muratcakmakis@yandex.com')
-            ->to($customer->getMail())
-            ->subject( $customer->getName().' Siparişiniz Bilgileriniz')
-            ->text('Sipariş bilgileriniz')
-            ->html($content);
+            ->to($this->customer->getMail())
+            ->subject( $this->customer->getName().' Siparişiniz Bilgileriniz')
+            ->text('Sipariş Bilgileriniz')
+            ->html($this->prepareHtml());
         $this->mailer->send($email);
         $this->logger->info('Mail sent');
     }

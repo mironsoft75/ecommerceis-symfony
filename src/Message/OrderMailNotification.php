@@ -2,52 +2,35 @@
 
 namespace App\Message;
 
-use App\Entity\Customer;
-use App\Entity\Order;
-use App\Entity\OrderProduct;
-use Doctrine\Common\Collections\Collection;
-
 class OrderMailNotification
 {
     /**
-     * @var Order
+     * @var int
      */
-    private Order $order;
-    /**
-     * @var Customer
-     */
-    private Customer $customer;
+    private int $orderId;
 
     /**
-     * @param Order $order
+     * @param int $orderId
      */
-    public function __construct(Order $order)
+    public function __construct(int $orderId)
     {
-        $this->order = $order;
-        $this->getCustomer();
+        $this->orderId = $orderId;
     }
 
     /**
-     * @return Collection<int, OrderProduct>
+     * @return int
      */
-    public function getOrderProducts(): Collection
+    public function getOrderId(): int
     {
-        return $this->order->getOrderProducts();
+        return $this->orderId;
     }
 
     /**
-     * @return Customer
+     * @param int $orderId
      */
-    public function getCustomer(): Customer
+    public function setOrderId(int $orderId): void
     {
-        return $this->order->getCustomer();
+        $this->orderId = $orderId;
     }
 
-    /**
-     * @return string
-     */
-    public function getCustomerName(): string
-    {
-        return $this->customer->getName();
-    }
 }
